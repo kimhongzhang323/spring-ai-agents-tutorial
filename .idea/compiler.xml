@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="03-structured-output" />
+        <module name="04-tool-calling" />
         <module name="shared" />
         <module name="00-prerequisites" />
         <module name="01-hello-agent" />
