@@ -6,9 +6,12 @@
 
 - Use `PromptTemplate` and `SystemPromptTemplate` to separate prompt logic from Java code.
 - Load prompt templates from classpath resources (`.st` files) so they can be edited without recompiling.
-- Apply few-shot examples inside a template to guide LLM output format.
-- Use role prompting (system message persona) to change the LLM's behaviour per endpoint.
-- Understand why user-supplied text must be inserted as a variable, never string-concatenated — and how the `InputValidator` guardrail from `shared/` prevents basic injection.
+- Apply **few-shot examples** inside a template to teach the LLM a precise output format.
+- Use **role prompting** (system message persona) to change the LLM's behaviour per endpoint.
+- Apply **Chain-of-Thought (CoT)** prompting to improve accuracy on complex reasoning tasks.
+- Use **meta-prompting** to have the LLM generate prompt templates for you.
+- Build **prompt chains**: sequential LLM calls where each step's output feeds the next.
+- Understand why user-supplied text must be a variable, never string-concatenated (prompt injection prevention).
 
 ## Prerequisites
 

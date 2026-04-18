@@ -29,6 +29,8 @@
         <module>11-langchain4j-agentic</module>
         <module>12-evaluation-and-testing</module>
         <module>13-deployment</module>
+        <module>14-mcp-server</module>
+        <module>15-multi-llm-providers</module>
         <module>examples/customer-support-agent</module>
         <module>examples/banking-assistant</module>
         <module>examples/research-agent</module>

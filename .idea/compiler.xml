@@ -10,6 +10,7 @@
         <module name="05-rag-basics" />
         <module name="banking-assistant" />
         <module name="research-agent" />
+        <module name="15-multi-llm-providers" />
         <module name="08-observability" />
         <module name="02-prompt-engineering" />
         <module name="customer-support-agent" />
@@ -18,6 +19,7 @@
         <module name="13-deployment" />
         <module name="00-prerequisites" />
         <module name="01-hello-agent" />
+        <module name="14-mcp-server" />
         <module name="03-structured-output" />
         <module name="04-tool-calling" />
         <module name="07-api-management" />

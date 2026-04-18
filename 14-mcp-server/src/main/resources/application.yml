@@ -1,0 +1,105 @@
+spring:
+  application:
+    name: mcp-server
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:not-configured}
+      chat:
+        options:
+          model: gpt-4o-mini
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: llama3.1
+
+    # MCP Server configuration
+    mcp:
+      server:
+        name: java-masterclass-mcp
+        version: 1.0.0
+        # SSE transport: clients connect to /sse and POST to /message
+        # For stdio transport, set to: stdio
+        type: SYNC
+        sse-message-endpoint: /message
+        resource-change-notification: true
+        tool-change-notification: true
+
+server:
+  port: 8014
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+      expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 100
+    refill-tokens-per-minute: 60
+    global-capacity: 1000
+    global-refill-tokens-per-minute: 600
+  mcp:
+    filesystem:
+      # Sandbox: only files under this directory are accessible
+      allowed-base-path: ${MCP_FS_BASE_PATH:${java.io.tmpdir}/mcp-sandbox}
+    api:
+      timeout-seconds: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      apiTool:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+  retry:
+    instances:
+      apiTool:
+        max-attempts: 3
+        wait-duration: 1s
+
+logging:
+  level:
+    com.masterclass: DEBUG
+    org.springframework.ai.mcp: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  ai:
+    openai:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}/v1
+      api-key: ollama
+      chat:
+        options:
+          model: llama3.1
+
+---
+spring:
+  config:
+    activate:
+      on-profile: cloud
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini

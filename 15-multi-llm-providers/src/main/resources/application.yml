@@ -1,0 +1,159 @@
+spring:
+  application:
+    name: multi-llm-providers
+
+  # Auto-configure only providers with API keys set.
+  # Spring AI starters back off if their required property is not set.
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:not-configured}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.7
+      # Groq uses OpenAI-compatible API — configure as a second OpenAI bean
+      # (see ProviderConfig.java for the named bean approach)
+
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:not-configured}
+      chat:
+        options:
+          model: claude-3-5-haiku-20241022
+          temperature: 0.7
+          max-tokens: 2048
+
+    vertex:
+      ai:
+        gemini:
+          project-id: ${GOOGLE_CLOUD_PROJECT:not-configured}
+          location: ${GOOGLE_CLOUD_REGION:us-central1}
+          chat:
+            options:
+              model: gemini-1.5-flash-002
+              temperature: 0.7
+
+    bedrock:
+      converse:
+        chat:
+          options:
+            model: anthropic.claude-3-haiku-20240307-v1:0
+            region: ${AWS_REGION:us-east-1}
+
+    azure:
+      openai:
+        api-key: ${AZURE_OPENAI_API_KEY:not-configured}
+        endpoint: ${AZURE_OPENAI_ENDPOINT:not-configured}
+        chat:
+          options:
+            deployment-name: ${AZURE_OPENAI_DEPLOYMENT:gpt-4o-mini}
+            temperature: 0.7
+
+    mistral:
+      ai:
+        api-key: ${MISTRAL_API_KEY:not-configured}
+        chat:
+          options:
+            model: mistral-small-latest
+            temperature: 0.7
+
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: llama3.1
+          temperature: 0.7
+
+server:
+  port: 8015
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+      expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 30
+    refill-tokens-per-minute: 30
+    global-capacity: 300
+    global-refill-tokens-per-minute: 300
+  providers:
+    # Default routing strategy when not specified in the request
+    default-strategy: balanced
+    # Which providers are enabled (determined by whether API key is set)
+    enabled: ${ENABLED_PROVIDERS:ollama}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+resilience4j:
+  retry:
+    instances:
+      llmRetry:
+        max-attempts: 3
+        wait-duration: 2s
+        retry-exceptions:
+          - org.springframework.ai.retry.NonTransientAiException
+  circuitbreaker:
+    instances:
+      llmCircuit:
+        sliding-window-size: 10
+        failure-rate-threshold: 60
+        wait-duration-in-open-state: 60s
+
+logging:
+  level:
+    com.masterclass: DEBUG
+    org.springframework.ai: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  ai:
+    openai:
+      api-key: ollama
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}/v1
+      chat:
+        options:
+          model: llama3.1
+
+---
+spring:
+  config:
+    activate:
+      on-profile: openai
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+
+---
+spring:
+  config:
+    activate:
+      on-profile: anthropic
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: all-providers
+# All providers active — requires all API keys to be set as environment variables
