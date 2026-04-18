@@ -1,0 +1,28 @@
+spring:
+  application.name: api-management
+  ai:
+    openai.api-key: ${OPENAI_API_KEY:not-configured}
+    ollama.base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+  datasource:
+    url: jdbc:h2:mem:apimanagement;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate.ddl-auto: create-drop
+    show-sql: false
+  data.redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:masterclass}
+
+app:
+  security.jwt:
+    secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+    expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 20
+    refill-tokens-per-minute: 20
+    global-capacity: 200
+    global-refill-tokens-per-minute: 200
+
+management.endpoints.web.exposure.include: health,info,prometheus
+springdoc.swagger-ui.path: /swagger-ui.html
