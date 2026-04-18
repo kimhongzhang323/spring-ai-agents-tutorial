@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: hello-agent
+
+  # Disable autoconfigure for the provider not in use (override per profile)
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:not-configured}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.7
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: llama3.1
+          temperature: 0.7
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+      expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 20
+    refill-tokens-per-minute: 20
+    global-capacity: 200
+    global-refill-tokens-per-minute: 200
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+
+logging:
+  level:
+    com.masterclass: DEBUG
+    org.springframework.ai: INFO

@@ -1,0 +1,11 @@
+# Cloud profile: routes all LLM calls through OpenAI (or swap for Anthropic/Gemini)
+spring:
+  ai:
+    autoconfigure:
+      exclude:
+        - org.springframework.ai.autoconfigure.ollama.OllamaAutoConfiguration
+    openai:
+      api-key: ${OPENAI_API_KEY}   # required — set in .env or CI secrets
+      chat:
+        options:
+          model: gpt-4o-mini

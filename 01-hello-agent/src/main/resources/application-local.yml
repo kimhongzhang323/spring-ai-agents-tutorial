@@ -1,0 +1,9 @@
+# Local profile: routes all LLM calls through Ollama
+spring:
+  ai:
+    openai:
+      api-key: "not-used-in-local-profile"
+    # Ollama auto-config is active; OpenAI ChatModel bean is suppressed below
+    autoconfigure:
+      exclude:
+        - org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration
