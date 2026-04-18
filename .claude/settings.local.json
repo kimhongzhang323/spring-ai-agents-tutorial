@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs sed -i 's/spring-ai-openai-spring-boot-starter/spring-ai-starter-model-openai/g; *)",
+      "Bash(java *)",
+      "Bash(JAVA_HOME=\"/c/Program Files/Eclipse Adoptium/jdk-21.0.8.7-hotspot\" mvn -q compile -DskipTests)",
+      "Read(//c/Program Files/Eclipse Adoptium//**)",
+      "Read(//c/Program Files/Microsoft//**)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn -version)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn -q compile -DskipTests)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn -q dependency:resolve -pl shared)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn dependency:resolve -pl shared)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn -q compile -pl shared)",
+      "Bash(jar tf *)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn dependency:resolve -pl 05-rag-basics)"
+    ]
+  }
+}

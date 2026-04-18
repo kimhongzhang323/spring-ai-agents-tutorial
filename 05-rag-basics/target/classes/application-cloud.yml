@@ -1,0 +1,5 @@
+spring:
+  ai:
+    autoconfigure.exclude:
+      - org.springframework.ai.autoconfigure.ollama.OllamaAutoConfiguration
+    openai.api-key: ${OPENAI_API_KEY}

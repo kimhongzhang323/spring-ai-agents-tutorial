@@ -1,0 +1,40 @@
+replicaCount: 2
+image:
+  repository: ghcr.io/your-org/agent-deployment
+  tag: "1.0.0-SNAPSHOT"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: agents.example.com
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+secrets:
+  openaiApiKey: ""   # Set via --set secrets.openaiApiKey=sk-... or external secret
+  jwtSecret: ""      # Set via --set secrets.jwtSecret=...
+
+spring:
+  profile: cloud
+
+otel:
+  endpoint: http://otel-collector:4318/v1/traces
+  samplingProbability: "0.1"

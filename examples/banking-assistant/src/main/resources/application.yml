@@ -1,0 +1,15 @@
+spring:
+  application.name: banking-assistant
+  ai:
+    openai.api-key: ${OPENAI_API_KEY:not-configured}
+    ollama.base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+app:
+  security.jwt:
+    secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+    expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 10
+    refill-tokens-per-minute: 10
+    global-capacity: 100
+    global-refill-tokens-per-minute: 100
+management.endpoints.web.exposure.include: health,info,prometheus

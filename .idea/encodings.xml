@@ -3,10 +3,38 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/00-prerequisites/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/00-prerequisites/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/01-hello-agent/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/01-hello-agent/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/02-prompt-engineering/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/02-prompt-engineering/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/03-structured-output/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/03-structured-output/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/04-tool-calling/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/04-tool-calling/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/05-rag-basics/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/05-rag-basics/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/06-memory-and-context/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/06-memory-and-context/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/07-api-management/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/07-api-management/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/08-observability/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/08-observability/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/09-guardrails/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/09-guardrails/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/10-multi-agent-supervisor/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/10-multi-agent-supervisor/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/11-langchain4j-agentic/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/11-langchain4j-agentic/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/12-evaluation-and-testing/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/12-evaluation-and-testing/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/13-deployment/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/13-deployment/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/examples/banking-assistant/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/examples/banking-assistant/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/examples/customer-support-agent/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/examples/customer-support-agent/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/examples/research-agent/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/examples/research-agent/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/shared/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/shared/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />

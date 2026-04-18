@@ -1,0 +1,15 @@
+com\masterclass\structured\ExtractionService$ExtractionFailedException.class
+com\masterclass\structured\domain\InvoiceData$LineItem.class
+com\masterclass\structured\ExtractionService.class
+com\masterclass\structured\langchain4j\DocumentExtractionService.class
+com\masterclass\structured\StructuredOutputApplication.class
+com\masterclass\structured\domain\ResumeData$WorkExperience.class
+com\masterclass\structured\domain\InvoiceData.class
+com\masterclass\structured\domain\ProductReview$Sentiment.class
+com\masterclass\structured\langchain4j\DocumentExtractionConfig.class
+com\masterclass\structured\ExtractionController.class
+com\masterclass\structured\domain\ResumeData.class
+com\masterclass\structured\exception\ParseRetryException.class
+com\masterclass\structured\domain\ResumeData$Education.class
+com\masterclass\structured\ExtractionExceptionHandler.class
+com\masterclass\structured\domain\ProductReview.class

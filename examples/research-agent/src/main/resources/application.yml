@@ -1,0 +1,24 @@
+spring:
+  application.name: research-agent
+  ai:
+    openai.api-key: ${OPENAI_API_KEY:not-configured}
+    ollama.base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+app:
+  security.jwt:
+    secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+    expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 5
+    refill-tokens-per-minute: 5
+    global-capacity: 50
+    global-refill-tokens-per-minute: 50
+langchain4j:
+  ollama:
+    base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    model-name: ${OLLAMA_MODEL:llama3.1}
+    temperature: 0.5
+  open-ai:
+    api-key: ${OPENAI_API_KEY:not-configured}
+    model-name: gpt-4o-mini
+    temperature: 0.5
+management.endpoints.web.exposure.include: health,info,prometheus

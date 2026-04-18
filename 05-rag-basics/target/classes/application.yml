@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: rag-basics
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:not-configured}
+      chat.options.model: gpt-4o-mini
+      embedding.options.model: text-embedding-3-small
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat.options.model: llama3.1
+      embedding.options.model: nomic-embed-text
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536           # matches text-embedding-3-small; use 768 for nomic-embed-text
+        initialize-schema: true
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:masterclass}
+    username: ${POSTGRES_USER:masterclass}
+    password: ${POSTGRES_PASSWORD:masterclass}
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+      expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 10
+    refill-tokens-per-minute: 10
+    global-capacity: 100
+    global-refill-tokens-per-minute: 100
+  rag:
+    chunk-size: 800
+    chunk-overlap: 100
+    top-k: 5
+    similarity-threshold: 0.7
+
+management.endpoints.web.exposure.include: health,info,prometheus
+springdoc.swagger-ui.path: /swagger-ui.html

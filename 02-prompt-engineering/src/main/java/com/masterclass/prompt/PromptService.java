@@ -86,7 +86,7 @@ public class PromptService {
         ));
 
         return chatClient.prompt()
-                .system(systemMessage.getContent())
+                .system(systemMessage.getText())
                 .user(request.question())
                 .call()
                 .content();

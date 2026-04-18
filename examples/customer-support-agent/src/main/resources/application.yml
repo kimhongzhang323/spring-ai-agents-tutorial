@@ -1,0 +1,26 @@
+spring:
+  application.name: customer-support
+  ai:
+    openai.api-key: ${OPENAI_API_KEY:not-configured}
+    ollama.base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    vectorstore:
+      pgvector:
+        initialize-schema: true
+        dimensions: 768
+  datasource:
+    url: jdbc:postgresql://${PGVECTOR_HOST:localhost}:5432/${PGVECTOR_DB:vectordb}
+    username: ${PGVECTOR_USER:postgres}
+    password: ${PGVECTOR_PASSWORD:postgres}
+  data.redis:
+    host: ${REDIS_HOST:localhost}
+    port: 6379
+app:
+  security.jwt:
+    secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+    expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 30
+    refill-tokens-per-minute: 30
+    global-capacity: 300
+    global-refill-tokens-per-minute: 300
+management.endpoints.web.exposure.include: health,info,prometheus

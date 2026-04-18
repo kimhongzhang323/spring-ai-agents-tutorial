@@ -1,0 +1,24 @@
+# Golden dataset for module 12 evaluation harness.
+# Each case has a question, ideal context chunks, and the expected answer.
+# Add real cases from your domain to run meaningful evaluations.
+
+- id: q1
+  question: "What is the CAP theorem?"
+  contexts:
+    - "The CAP theorem states that a distributed system can only guarantee two of three properties: Consistency, Availability, and Partition tolerance."
+    - "In practice, partition tolerance is non-negotiable in distributed systems, so the real trade-off is between consistency and availability."
+  expected_answer: "The CAP theorem states that a distributed system cannot simultaneously guarantee Consistency, Availability, and Partition tolerance. Since partitions are unavoidable, systems must choose between consistency and availability during a partition."
+
+- id: q2
+  question: "What is the difference between a chatbot and an AI agent?"
+  contexts:
+    - "A chatbot typically follows a fixed script or retrieves pre-defined responses. An AI agent can reason, plan, and take actions using tools to accomplish goals."
+    - "AI agents use a reasoning loop (like ReAct) where they observe, think, and act iteratively until the task is complete."
+  expected_answer: "A chatbot responds to inputs using fixed rules or retrieval. An AI agent reasons, plans, and uses tools to accomplish complex tasks autonomously through an iterative reasoning loop."
+
+- id: q3
+  question: "What is RAG in the context of LLMs?"
+  contexts:
+    - "RAG stands for Retrieval-Augmented Generation. It augments a language model's prompt with relevant documents retrieved from a vector store."
+    - "RAG reduces hallucinations by grounding the LLM's response in real, retrieved documents rather than relying solely on parametric knowledge."
+  expected_answer: "RAG (Retrieval-Augmented Generation) is a technique that retrieves relevant documents from a vector store and includes them in the LLM's prompt, grounding responses in real information and reducing hallucinations."

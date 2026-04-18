@@ -1,7 +1,7 @@
 package com.masterclass.shared.ratelimit;
 
-import com.bucket4j.Bandwidth;
-import com.bucket4j.Bucket;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
