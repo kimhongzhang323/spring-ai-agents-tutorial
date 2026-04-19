@@ -1,0 +1,8 @@
+com\masterclass\llmbasics\common\LlmResponse.class
+com\masterclass\llmbasics\openai\OpenAiClient.class
+com\masterclass\llmbasics\ollama\OllamaClient.class
+com\masterclass\llmbasics\Main.class
+com\masterclass\llmbasics\gemini\GeminiClient.class
+com\masterclass\llmbasics\qwen\QwenClient.class
+com\masterclass\llmbasics\anthropic\AnthropicClient.class
+com\masterclass\llmbasics\common\HttpHelper.class

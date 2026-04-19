@@ -1,0 +1,8 @@
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\00-llm-api-basics\src\main\java\com\masterclass\llmbasics\anthropic\AnthropicClient.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\00-llm-api-basics\src\main\java\com\masterclass\llmbasics\common\HttpHelper.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\00-llm-api-basics\src\main\java\com\masterclass\llmbasics\common\LlmResponse.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\00-llm-api-basics\src\main\java\com\masterclass\llmbasics\gemini\GeminiClient.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\00-llm-api-basics\src\main\java\com\masterclass\llmbasics\Main.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\00-llm-api-basics\src\main\java\com\masterclass\llmbasics\ollama\OllamaClient.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\00-llm-api-basics\src\main\java\com\masterclass\llmbasics\openai\OpenAiClient.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\00-llm-api-basics\src\main\java\com\masterclass\llmbasics\qwen\QwenClient.java
