@@ -106,6 +106,69 @@ public class ProviderConfig {
         return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 
+    // ── DeepSeek — OpenAI-compatible API ──────────────────────────────────────
+    // DeepSeek offers strong reasoning at low cost; uses the OpenAI-compatible endpoint.
+    // Set DEEPSEEK_API_KEY to enable.
+
+    @Bean("deepseekClient")
+    @ConditionalOnProperty(name = "DEEPSEEK_API_KEY", matchIfMissing = false)
+    ChatClient deepseekClient() {
+        var api = OpenAiApi.builder()
+                .baseUrl("https://api.deepseek.com")
+                .apiKey(System.getenv("DEEPSEEK_API_KEY"))
+                .build();
+        var model = OpenAiChatModel.builder()
+                .openAiApi(api)
+                .defaultOptions(OpenAiChatOptions.builder()
+                        .model("deepseek-chat")
+                        .temperature(0.7)
+                        .build())
+                .build();
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
+    }
+
+    // ── Together AI — OpenAI-compatible, hosts 100+ open models ──────────────
+    // Good for running Llama, Mistral, Qwen, etc. in the cloud.
+    // Set TOGETHER_API_KEY to enable.
+
+    @Bean("togetherClient")
+    @ConditionalOnProperty(name = "TOGETHER_API_KEY", matchIfMissing = false)
+    ChatClient togetherClient() {
+        var api = OpenAiApi.builder()
+                .baseUrl("https://api.together.xyz/v1")
+                .apiKey(System.getenv("TOGETHER_API_KEY"))
+                .build();
+        var model = OpenAiChatModel.builder()
+                .openAiApi(api)
+                .defaultOptions(OpenAiChatOptions.builder()
+                        .model("meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo")
+                        .temperature(0.7)
+                        .build())
+                .build();
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
+    }
+
+    // ── Perplexity AI — OpenAI-compatible, with web search grounding ─────────
+    // Perplexity models can access current web data — great for factual queries.
+    // Set PERPLEXITY_API_KEY to enable.
+
+    @Bean("perplexityClient")
+    @ConditionalOnProperty(name = "PERPLEXITY_API_KEY", matchIfMissing = false)
+    ChatClient perplexityClient() {
+        var api = OpenAiApi.builder()
+                .baseUrl("https://api.perplexity.ai")
+                .apiKey(System.getenv("PERPLEXITY_API_KEY"))
+                .build();
+        var model = OpenAiChatModel.builder()
+                .openAiApi(api)
+                .defaultOptions(OpenAiChatOptions.builder()
+                        .model("sonar-pro")
+                        .temperature(0.7)
+                        .build())
+                .build();
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
+    }
+
     // ── Ollama — always present; this is the last-resort fallback ─────────────
 
     @Bean("ollamaClient")

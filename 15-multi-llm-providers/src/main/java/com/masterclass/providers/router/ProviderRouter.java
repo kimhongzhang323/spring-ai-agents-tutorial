@@ -17,10 +17,11 @@ import java.util.Optional;
  * injected — we use Optional<ChatClient> to handle absent providers gracefully.
  *
  * Priority order per strategy (first available wins):
- *   COST:     groq → mistral → openai → anthropic → ollama
- *   QUALITY:  openai → anthropic → gemini → mistral → ollama
- *   BALANCED: anthropic → openai → mistral → groq → ollama
+ *   COST:     groq → deepseek → together → mistral → openai → anthropic → ollama
+ *   QUALITY:  openai → anthropic → gemini → bedrock → azure → mistral → ollama
+ *   BALANCED: anthropic → openai → gemini → mistral → groq → ollama
  *   LOCAL:    ollama only
+ *   RESEARCH: perplexity → openai → anthropic → ollama
  */
 @Component
 public class ProviderRouter {
@@ -37,7 +38,10 @@ public class ProviderRouter {
             @Qualifier("groqClient") Optional<ChatClient> groqClient,
             @Qualifier("mistralClient") Optional<ChatClient> mistralClient,
             @Qualifier("azureClient") Optional<ChatClient> azureClient,
-            @Qualifier("bedrockClient") Optional<ChatClient> bedrockClient) {
+            @Qualifier("bedrockClient") Optional<ChatClient> bedrockClient,
+            @Qualifier("deepseekClient") Optional<ChatClient> deepseekClient,
+            @Qualifier("togetherClient") Optional<ChatClient> togetherClient,
+            @Qualifier("perplexityClient") Optional<ChatClient> perplexityClient) {
 
         var builder = new java.util.HashMap<String, ChatClient>();
         builder.put("ollama", ollamaClient);
@@ -48,6 +52,9 @@ public class ProviderRouter {
         mistralClient.ifPresent(c -> builder.put("mistral", c));
         azureClient.ifPresent(c -> builder.put("azure", c));
         bedrockClient.ifPresent(c -> builder.put("bedrock", c));
+        deepseekClient.ifPresent(c -> builder.put("deepseek", c));
+        togetherClient.ifPresent(c -> builder.put("together", c));
+        perplexityClient.ifPresent(c -> builder.put("perplexity", c));
         this.clientsByName = Map.copyOf(builder);
 
         log.info("ProviderRouter ready. Available providers: {}", clientsByName.keySet());
@@ -83,10 +90,11 @@ public class ProviderRouter {
 
     private List<String> preferenceList(RoutingStrategy strategy, String explicit) {
         return switch (strategy) {
-            case COST     -> List.of("groq", "mistral", "openai", "anthropic", "gemini", "bedrock", "azure", "ollama");
+            case COST     -> List.of("groq", "deepseek", "together", "mistral", "openai", "anthropic", "gemini", "bedrock", "azure", "ollama");
             case QUALITY  -> List.of("openai", "anthropic", "gemini", "bedrock", "azure", "mistral", "groq", "ollama");
-            case BALANCED -> List.of("anthropic", "openai", "gemini", "mistral", "groq", "bedrock", "azure", "ollama");
+            case BALANCED -> List.of("anthropic", "openai", "gemini", "mistral", "deepseek", "groq", "bedrock", "azure", "ollama");
             case LOCAL    -> List.of("ollama");
+            case RESEARCH -> List.of("perplexity", "openai", "anthropic", "ollama");
             case EXPLICIT -> explicit != null ? List.of(explicit.toLowerCase(), "ollama") : List.of("ollama");
         };
     }
