@@ -31,6 +31,7 @@
         <module>13-deployment</module>
         <module>14-mcp-server</module>
         <module>15-multi-llm-providers</module>
+        <module>16-knowledge-graph</module>
         <module>examples/customer-support-agent</module>
         <module>examples/banking-assistant</module>
         <module>examples/research-agent</module>

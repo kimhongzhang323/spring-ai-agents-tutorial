@@ -33,6 +33,8 @@
     <file url="file://$PROJECT_DIR$/14-mcp-server/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/15-multi-llm-providers/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/15-multi-llm-providers/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/16-knowledge-graph/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/16-knowledge-graph/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/examples/banking-assistant/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/examples/banking-assistant/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/examples/customer-support-agent/src/main/java" charset="UTF-8" />

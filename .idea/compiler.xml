@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="shared" />
+        <module name="16-knowledge-graph" />
         <module name="05-rag-basics" />
         <module name="banking-assistant" />
         <module name="research-agent" />

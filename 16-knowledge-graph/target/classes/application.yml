@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: knowledge-graph-agent
+  profiles:
+    active: local
+
+server:
+  port: 8086
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.masterclass.knowledgegraph: DEBUG
+    org.springframework.ai: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: llama3.2
+        options:
+          temperature: 0.1   # Low temp for deterministic extraction
+          num-predict: 2048
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET:local-dev-secret-change-in-production-minimum-32-chars}
+      expiration-ms: 3600000
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+---
+spring:
+  config:
+    activate:
+      on-profile: cloud
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.1
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration-ms: 3600000
+
+  data:
+    redis:
+      url: ${REDIS_URL}
