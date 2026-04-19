@@ -46,10 +46,57 @@ class PromptTemplateRenderTest {
         var template = new PromptTemplate(new ClassPathResource("prompts/classify-sentiment.st"));
         var rendered = template.render(Map.of("text", "Great product!"));
 
-        // Few-shot examples must be present in the rendered template
         assertThat(rendered).contains("POSITIVE");
         assertThat(rendered).contains("NEGATIVE");
         assertThat(rendered).contains("NEUTRAL");
         assertThat(rendered).contains("Great product!");
+    }
+
+    @Test
+    void chainOfThoughtTemplateInjectsProblem() {
+        var template = new PromptTemplate(new ClassPathResource("prompts/chain-of-thought.st"));
+        var rendered = template.render(Map.of("problem", "What is 17 * 8?"));
+
+        assertThat(rendered).contains("What is 17 * 8?");
+        assertThat(rendered).contains("Step 1");
+        assertThat(rendered).contains("Final Answer");
+        assertThat(rendered).doesNotContain("{problem}");
+    }
+
+    @Test
+    void codeReviewChainTemplateInjectsCodeAndLanguage() {
+        var template = new PromptTemplate(new ClassPathResource("prompts/code-review-chain.st"));
+        var rendered = template.render(Map.of("code", "System.out.println(x);", "language", "java"));
+
+        assertThat(rendered).contains("System.out.println(x);");
+        assertThat(rendered).contains("java");
+        assertThat(rendered).contains("CRITICAL");
+        assertThat(rendered).doesNotContain("{code}");
+        assertThat(rendered).doesNotContain("{language}");
+    }
+
+    @Test
+    void metaPromptTemplateInjectsUseCaseAndAudience() {
+        var template = new PromptTemplate(new ClassPathResource("prompts/meta-prompt.st"));
+        var rendered = template.render(Map.of(
+                "useCase", "customer support chatbot",
+                "targetAudience", "non-technical users"
+        ));
+
+        assertThat(rendered).contains("customer support chatbot");
+        assertThat(rendered).contains("non-technical users");
+        assertThat(rendered).contains("SYSTEM PROMPT");
+        assertThat(rendered).doesNotContain("{useCase}");
+    }
+
+    @Test
+    void entityExtractTemplateContainsFewShotExamplesAndInjectsText() {
+        var template = new PromptTemplate(new ClassPathResource("prompts/few-shot-entity-extract.st"));
+        var rendered = template.render(Map.of("text", "Elon Musk visited Berlin."));
+
+        assertThat(rendered).contains("Elon Musk visited Berlin.");
+        assertThat(rendered).contains("persons");
+        assertThat(rendered).contains("organizations");
+        assertThat(rendered).doesNotContain("{text}");
     }
 }

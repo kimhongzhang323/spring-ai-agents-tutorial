@@ -10,21 +10,24 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 /**
- * Creates named ChatClient beans for each provider.
+ * Creates a named ChatClient bean for each LLM provider.
  *
- * Beans are conditional: if the provider's API key is "not-configured"
- * (the default in application.yml), the bean is not created and the
- * provider is simply unavailable at runtime.
+ * Strategy: rely on Spring AI's own auto-configuration to create ChatModel beans.
+ * Each Spring AI starter creates its ChatModel bean only when the required
+ * property (api-key, endpoint, etc.) is present and non-default.
+ * We then wrap each ChatModel in a named ChatClient bean using @ConditionalOnBean.
  *
- * This lets you run the module with only Ollama locally and enable
- * cloud providers by exporting their API keys.
+ * This means:
+ *   - Export OPENAI_API_KEY  → "openaiClient" bean appears
+ *   - Export ANTHROPIC_API_KEY → "anthropicClient" bean appears
+ *   - Ollama always available (no key needed)
+ *   - ProviderRouter receives Optional<ChatClient> for each — absent = not configured
  */
 @Configuration
 public class ProviderConfig {
@@ -34,101 +37,79 @@ public class ProviderConfig {
             If you don't know something, say so rather than guessing.
             """;
 
-    // ── OpenAI ──────────────────────────────────────────────────────────────
+    // ── OpenAI ───────────────────────────────────────────────────────────────
+    // Spring AI creates OpenAiChatModel bean only when spring.ai.openai.api-key != "not-configured"
 
     @Bean("openaiClient")
-    @Primary
-    @ConditionalOnProperty(name = "spring.ai.openai.api-key", matchIfMissing = false,
-            havingValue = "not-configured", matchIfMissing = false)
-    ChatClient openaiClient(OpenAiChatModel openAiChatModel) {
-        return ChatClient.builder(openAiChatModel)
-                .defaultSystem(SYSTEM_PROMPT)
-                .build();
+    @ConditionalOnBean(OpenAiChatModel.class)
+    ChatClient openaiClient(OpenAiChatModel model) {
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 
-    // ── Groq (OpenAI-compatible endpoint, different base URL) ───────────────
+    // ── Groq (OpenAI-compatible, different base URL) ──────────────────────────
+    // Groq has no Spring AI starter — we manually build the OpenAiChatModel with Groq's URL
 
     @Bean("groqClient")
-    @ConditionalOnProperty(name = "GROQ_API_KEY", havingValue = "")
+    @ConditionalOnProperty(name = "GROQ_API_KEY")
     ChatClient groqClient() {
-        // Groq uses the OpenAI wire format at a different base URL
-        var groqApi = OpenAiApi.builder()
+        var api = OpenAiApi.builder()
                 .baseUrl("https://api.groq.com/openai")
-                .apiKey(System.getenv().getOrDefault("GROQ_API_KEY", "not-configured"))
-                .build();
-        var options = OpenAiChatOptions.builder()
-                .model("llama-3.1-70b-versatile")
-                .temperature(0.7)
+                .apiKey(System.getenv("GROQ_API_KEY"))
                 .build();
         var model = OpenAiChatModel.builder()
-                .openAiApi(groqApi)
-                .defaultOptions(options)
+                .openAiApi(api)
+                .defaultOptions(OpenAiChatOptions.builder()
+                        .model("llama-3.1-70b-versatile")
+                        .temperature(0.7)
+                        .build())
                 .build();
-        return ChatClient.builder(model)
-                .defaultSystem(SYSTEM_PROMPT)
-                .build();
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 
-    // ── Anthropic Claude ────────────────────────────────────────────────────
+    // ── Anthropic Claude ──────────────────────────────────────────────────────
 
     @Bean("anthropicClient")
-    @ConditionalOnProperty(name = "spring.ai.anthropic.api-key", matchIfMissing = false,
-            havingValue = "not-configured", matchIfMissing = false)
-    ChatClient anthropicClient(AnthropicChatModel anthropicChatModel) {
-        return ChatClient.builder(anthropicChatModel)
-                .defaultSystem(SYSTEM_PROMPT)
-                .build();
+    @ConditionalOnBean(AnthropicChatModel.class)
+    ChatClient anthropicClient(AnthropicChatModel model) {
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 
-    // ── Google Gemini ────────────────────────────────────────────────────────
+    // ── Google Gemini ─────────────────────────────────────────────────────────
 
     @Bean("geminiClient")
-    @ConditionalOnProperty(name = "spring.ai.vertex.ai.gemini.project-id", matchIfMissing = false,
-            havingValue = "not-configured", matchIfMissing = false)
-    ChatClient geminiClient(VertexAiGeminiChatModel geminiChatModel) {
-        return ChatClient.builder(geminiChatModel)
-                .defaultSystem(SYSTEM_PROMPT)
-                .build();
+    @ConditionalOnBean(VertexAiGeminiChatModel.class)
+    ChatClient geminiClient(VertexAiGeminiChatModel model) {
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 
-    // ── AWS Bedrock ──────────────────────────────────────────────────────────
+    // ── AWS Bedrock ───────────────────────────────────────────────────────────
 
     @Bean("bedrockClient")
-    @ConditionalOnProperty(name = "AWS_REGION")
-    ChatClient bedrockClient(BedrockProxyChatModel bedrockChatModel) {
-        return ChatClient.builder(bedrockChatModel)
-                .defaultSystem(SYSTEM_PROMPT)
-                .build();
+    @ConditionalOnBean(BedrockProxyChatModel.class)
+    ChatClient bedrockClient(BedrockProxyChatModel model) {
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 
-    // ── Azure OpenAI ─────────────────────────────────────────────────────────
+    // ── Azure OpenAI ──────────────────────────────────────────────────────────
 
     @Bean("azureClient")
-    @ConditionalOnProperty(name = "spring.ai.azure.openai.api-key", matchIfMissing = false,
-            havingValue = "not-configured", matchIfMissing = false)
-    ChatClient azureClient(AzureOpenAiChatModel azureChatModel) {
-        return ChatClient.builder(azureChatModel)
-                .defaultSystem(SYSTEM_PROMPT)
-                .build();
+    @ConditionalOnBean(AzureOpenAiChatModel.class)
+    ChatClient azureClient(AzureOpenAiChatModel model) {
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 
     // ── Mistral AI ────────────────────────────────────────────────────────────
 
     @Bean("mistralClient")
-    @ConditionalOnProperty(name = "spring.ai.mistral.ai.api-key", matchIfMissing = false,
-            havingValue = "not-configured", matchIfMissing = false)
-    ChatClient mistralClient(MistralAiChatModel mistralChatModel) {
-        return ChatClient.builder(mistralChatModel)
-                .defaultSystem(SYSTEM_PROMPT)
-                .build();
+    @ConditionalOnBean(MistralAiChatModel.class)
+    ChatClient mistralClient(MistralAiChatModel model) {
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 
-    // ── Ollama (always available if Docker is running) ────────────────────────
+    // ── Ollama — always present; this is the last-resort fallback ─────────────
 
     @Bean("ollamaClient")
-    ChatClient ollamaClient(OllamaChatModel ollamaChatModel) {
-        return ChatClient.builder(ollamaChatModel)
-                .defaultSystem(SYSTEM_PROMPT)
-                .build();
+    ChatClient ollamaClient(OllamaChatModel model) {
+        return ChatClient.builder(model).defaultSystem(SYSTEM_PROMPT).build();
     }
 }
