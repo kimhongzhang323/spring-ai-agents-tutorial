@@ -1,0 +1,11 @@
+type Query {
+    integrations: [Integration!]!
+    integrationByCategory(category: String!): [Integration!]!
+}
+
+type Integration {
+    name: String!
+    category: String!
+    description: String!
+    tools: [String!]!
+}

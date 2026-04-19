@@ -1,0 +1,174 @@
+spring:
+  application:
+    name: microservices-integration
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:not-configured}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.3
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: llama3.1
+          temperature: 0.3
+
+  # ── Databases ──────────────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:agentdb}
+    username: ${POSTGRES_USER:agent}
+    password: ${POSTGRES_PASSWORD:agent}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_HOST:localhost}:27017/${MONGO_DB:agentdb}
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+    elasticsearch:
+      uris: http://${ELASTIC_HOST:localhost}:9200
+    neo4j:
+      uri: bolt://${NEO4J_HOST:localhost}:7687
+      authentication:
+        username: ${NEO4J_USER:neo4j}
+        password: ${NEO4J_PASSWORD:password}
+    cassandra:
+      contact-points: ${CASSANDRA_HOST:localhost}
+      port: 9042
+      keyspace-name: agentdb
+      local-datacenter: datacenter1
+
+  # ── Messaging ──────────────────────────────────────────────────────────────
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: 5672
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASSWORD:guest}
+    listener:
+      simple:
+        acknowledge-mode: manual
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    consumer:
+      group-id: agent-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  pulsar:
+    client:
+      service-url: pulsar://${PULSAR_HOST:localhost}:6650
+    producer:
+      topic-name: agent-events
+
+  artemis:
+    mode: native
+    broker-url: tcp://${ARTEMIS_HOST:localhost}:61616
+    user: ${ARTEMIS_USER:artemis}
+    password: ${ARTEMIS_PASSWORD:artemis}
+
+  # ── Camel ──────────────────────────────────────────────────────────────────
+  camel:
+    springboot:
+      name: AgentCamelContext
+
+  # ── GraphQL ────────────────────────────────────────────────────────────────
+  graphql:
+    graphiql:
+      enabled: true
+
+# ── gRPC ─────────────────────────────────────────────────────────────────────
+grpc:
+  server:
+    port: 9090
+  client:
+    inventory-service:
+      address: static://${GRPC_SERVICE_HOST:localhost}:9091
+      negotiation-type: plaintext
+
+# ── Temporal ─────────────────────────────────────────────────────────────────
+spring.temporal:
+  connection:
+    target: ${TEMPORAL_HOST:localhost}:7233
+
+# ── Dapr ─────────────────────────────────────────────────────────────────────
+dapr:
+  http:
+    endpoint: http://${DAPR_HOST:localhost}:3500
+
+# ── AWS (LocalStack) ─────────────────────────────────────────────────────────
+aws:
+  region: ${AWS_REGION:us-east-1}
+  endpoint-override: http://${LOCALSTACK_HOST:localhost}:4566
+  credentials:
+    access-key: test
+    secret-key: test
+
+# ── Azure Service Bus ────────────────────────────────────────────────────────
+azure:
+  servicebus:
+    connection-string: ${AZURE_SERVICEBUS_CONNECTION_STRING:Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=test}
+    queue-name: agent-tasks
+
+# ── NATS ─────────────────────────────────────────────────────────────────────
+nats:
+  server: nats://${NATS_HOST:localhost}:4222
+
+# ── ClickHouse ───────────────────────────────────────────────────────────────
+clickhouse:
+  url: jdbc:clickhouse://${CLICKHOUSE_HOST:localhost}:8123/default
+  username: ${CLICKHOUSE_USER:default}
+  password: ${CLICKHOUSE_PASSWORD:}
+
+# ── API Management ────────────────────────────────────────────────────────────
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+      expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 30
+    refill-tokens-per-minute: 30
+    global-capacity: 300
+    global-refill-tokens-per-minute: 300
+
+# ── Resilience ────────────────────────────────────────────────────────────────
+resilience4j:
+  retry:
+    instances:
+      llmRetry:
+        max-attempts: 3
+        wait-duration: 1s
+  circuitbreaker:
+    instances:
+      integrationCircuitBreaker:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+
+# ── Observability ─────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha

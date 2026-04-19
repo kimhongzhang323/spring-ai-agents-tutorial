@@ -1,0 +1,299 @@
+version: "3.9"
+
+# ─── Module 17: Microservices Integration — Full Infrastructure Stack ───────
+# Starts every service needed to run all integration demos in this module.
+# Usage: docker compose up -d
+# Stop:  docker compose down -v
+
+services:
+
+  # ── Messaging ──────────────────────────────────────────────────────────────
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: mod17-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # Management UI: http://localhost:15672 (guest/guest)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.7.0
+    container_name: mod17-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.7.0
+    container_name: mod17-kafka
+    depends_on: [zookeeper]
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: mod17-kafka-ui
+    depends_on: [kafka]
+    ports:
+      - "8090:8080"  # Kafka UI: http://localhost:8090
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.7.0
+    container_name: mod17-schema-registry
+    depends_on: [kafka]
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: mod17-nats
+    ports:
+      - "4222:4222"   # Client port
+      - "8222:8222"   # Monitoring: http://localhost:8222
+
+  pulsar:
+    image: apachepulsar/pulsar:3.3.0
+    container_name: mod17-pulsar
+    command: bin/pulsar standalone
+    ports:
+      - "6650:6650"   # Pulsar broker
+      - "8089:8080"   # Pulsar admin UI
+
+  activemq:
+    image: apache/activemq-artemis:latest
+    container_name: mod17-activemq
+    ports:
+      - "61616:61616"  # STOMP/JMS
+      - "8161:8161"    # Admin console: http://localhost:8161 (artemis/artemis)
+    environment:
+      ANONYMOUS_LOGIN: "false"
+      ARTEMIS_USER: artemis
+      ARTEMIS_PASSWORD: artemis
+
+  # Azure Service Bus emulator (Azurite provides Storage; for SB use unofficial image)
+  azure-servicebus-emulator:
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    container_name: mod17-azure-servicebus
+    ports:
+      - "5300:5300"
+    environment:
+      ACCEPT_EULA: "Y"
+      SQL_SERVER: sqlserver
+      MSSQL_SA_PASSWORD: AgentPass@123!
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mod17-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: AgentPass@123!
+    ports:
+      - "1433:1433"
+
+  # ── AWS LocalStack (SQS, SNS, DynamoDB) ───────────────────────────────────
+  localstack:
+    image: localstack/localstack:3.7
+    container_name: mod17-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sqs,sns,dynamodb
+      DEFAULT_REGION: us-east-1
+      EAGER_SERVICE_LOADING: 1
+    volumes:
+      - ./localstack-init:/etc/localstack/init/ready.d
+
+  # ── Databases ──────────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mod17-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: agentdb
+      POSTGRES_USER: agent
+      POSTGRES_PASSWORD: agent
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent -d agentdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7.0
+    container_name: mod17-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: agentdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cassandra:
+    image: cassandra:5.0
+    container_name: mod17-cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_CLUSTER_NAME: AgentCluster
+      CASSANDRA_DC: datacenter1
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: mod17-elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: mod17-kibana
+    depends_on: [elasticsearch]
+    ports:
+      - "5601:5601"  # Kibana UI: http://localhost:5601
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+
+  neo4j:
+    image: neo4j:5.23-community
+    container_name: mod17-neo4j
+    ports:
+      - "7474:7474"  # Browser: http://localhost:7474
+      - "7687:7687"  # Bolt
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4J_PLUGINS: '["apoc"]'
+    healthcheck:
+      test: ["CMD", "neo4j", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: mod17-clickhouse
+    ports:
+      - "8123:8123"   # HTTP interface
+      - "9000:9000"   # Native client
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Cache ──────────────────────────────────────────────────────────────────
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: mod17-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Service Mesh ───────────────────────────────────────────────────────────
+
+  temporal:
+    image: temporalio/auto-setup:1.24.2
+    container_name: mod17-temporal
+    depends_on: [postgres]
+    ports:
+      - "7233:7233"   # Temporal frontend gRPC
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=agent
+      - POSTGRES_PWD=agent
+      - POSTGRES_SEEDS=postgres
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+
+  temporal-ui:
+    image: temporalio/ui:2.29.1
+    container_name: mod17-temporal-ui
+    depends_on: [temporal]
+    ports:
+      - "8233:8080"   # Temporal UI: http://localhost:8233
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+
+  dapr:
+    image: daprio/dapr:1.14.4
+    container_name: mod17-dapr-placement
+    command: ["./placement", "-port", "50006"]
+    ports:
+      - "50006:50006"
+
+  # ── Observability ──────────────────────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: mod17-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: mod17-grafana
+    depends_on: [prometheus]
+    ports:
+      - "3000:3000"   # Grafana: http://localhost:3000 (admin/admin)
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  grafana-data:
