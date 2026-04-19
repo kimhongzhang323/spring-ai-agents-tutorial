@@ -1,8 +1,13 @@
 com\masterclass\prompt\langchain4j\TextProcessingService.class
 com\masterclass\prompt\dto\TranslateRequest.class
+com\masterclass\prompt\dto\CodeReviewRequest.class
 com\masterclass\prompt\langchain4j\TextProcessingServiceConfig.class
 com\masterclass\prompt\dto\ExpertChatRequest.class
 com\masterclass\prompt\PromptEngineeringApplication.class
 com\masterclass\prompt\PromptService.class
+com\masterclass\prompt\dto\MetaPromptRequest.class
 com\masterclass\prompt\dto\SummarizeRequest.class
+com\masterclass\prompt\PromptService$PromptChainResult.class
 com\masterclass\prompt\PromptController.class
+com\masterclass\prompt\dto\ChainOfThoughtRequest.class
+com\masterclass\prompt\dto\PromptChainRequest.class

@@ -1,13 +1,14 @@
 package com.masterclass.guardrails;
 
-import org.springframework.ai.chat.client.advisor.api.*;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Custom Spring AI Advisor that applies guardrails in the advisor chain.
@@ -18,8 +19,12 @@ import java.util.Map;
  *
  * This is the idiomatic Spring AI way to apply cross-cutting concerns to LLM calls.
  * The alternative (service-level if/else) leaks guardrail logic into business code.
+ *
+ * In Spring AI 1.0.0, the preferred advisor base is {@link BaseAdvisor} which exposes
+ * {@code before()} and {@code after()} hooks — cleaner than implementing the full
+ * {@code adviseCall()} lifecycle yourself.
  */
-public class GuardrailAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
+public class GuardrailAdvisor implements BaseAdvisor {
 
     private final ContentModerator moderator;
     private final PiiRedactor piiRedactor;
@@ -33,38 +38,36 @@ public class GuardrailAdvisor implements CallAroundAdvisor, StreamAroundAdvisor 
     public String getName() { return "GuardrailAdvisor"; }
 
     @Override
-    public int getOrder() { return 0; }  // Run before other advisors
+    public int getOrder() { return 0; }
 
+    /**
+     * Input guardrail: runs BEFORE the LLM call.
+     * Returns a blocked request stub if the input fails moderation.
+     * BaseAdvisor calls this then proceeds to the LLM only if no exception is thrown.
+     */
     @Override
-    public AdvisedResponse aroundCall(AdvisedRequest request, CallAroundAdvisorChain chain) {
-        // --- Input guardrail ---
+    public ChatClientRequest before(ChatClientRequest request, AdvisorChain chain) {
         String userText = extractUserText(request);
         var inputCheck = moderator.moderate(userText);
         if (inputCheck.isBlocked()) {
-            return blockedResponse(request, inputCheck.reason());
+            // Throw a custom exception that the service layer catches to return a blocked response
+            throw new GuardrailBlockedException("Input blocked: " + inputCheck.reason());
         }
-
-        // --- Proceed to LLM ---
-        AdvisedResponse response = chain.nextAroundCall(request);
-
-        // --- Output guardrail ---
-        return applyOutputGuardrails(response);
+        return request;
     }
 
+    /**
+     * Output guardrail: runs AFTER the LLM call.
+     * Applies PII redaction and output content moderation.
+     */
     @Override
-    public Flux<AdvisedResponse> aroundStream(AdvisedRequest request, StreamAroundAdvisorChain chain) {
-        String userText = extractUserText(request);
-        var inputCheck = moderator.moderate(userText);
-        if (inputCheck.isBlocked()) {
-            return Flux.just(blockedResponse(request, inputCheck.reason()));
-        }
-        return chain.nextAroundStream(request)
-                .map(this::applyOutputGuardrails);
-    }
+    public ChatClientResponse after(ChatClientResponse response, AdvisorChain chain) {
+        if (response.chatResponse() == null) return response;
 
-    private AdvisedResponse applyOutputGuardrails(AdvisedResponse response) {
-        if (response.response() == null) return response;
-        String content = response.response().getResult().getOutput().getText();
+        var result = response.chatResponse().getResult();
+        if (result == null || result.getOutput() == null) return response;
+
+        String content = result.getOutput().getText();
         if (content == null) return response;
 
         // PII redaction
@@ -76,19 +79,20 @@ public class GuardrailAdvisor implements CallAroundAdvisor, StreamAroundAdvisor 
                 ? "[Response blocked by content policy]"
                 : redacted.redactedText();
 
-        // Rebuild response with redacted content
+        // Rebuild the ChatClientResponse with redacted content
         var newGeneration = new Generation(new AssistantMessage(finalContent));
-        var newChatResponse = new ChatResponse(List.of(newGeneration), response.response().getMetadata());
-        return new AdvisedResponse(newChatResponse, response.adviseContext());
+        var newChatResponse = new ChatResponse(List.of(newGeneration), response.chatResponse().getMetadata());
+        return new ChatClientResponse(newChatResponse, response.context());
     }
 
-    private String extractUserText(AdvisedRequest request) {
-        return request.userText() != null ? request.userText() : "";
+    private String extractUserText(ChatClientRequest request) {
+        var userMsg = request.prompt().getUserMessage();
+        return userMsg != null ? userMsg.getText() : "";
     }
 
-    private AdvisedResponse blockedResponse(AdvisedRequest request, String reason) {
-        var msg = new AssistantMessage("I'm unable to process that request: " + reason);
-        var response = new ChatResponse(List.of(new Generation(msg)));
-        return new AdvisedResponse(response, Map.of());
+    public static class GuardrailBlockedException extends RuntimeException {
+        public GuardrailBlockedException(String message) {
+            super(message);
+        }
     }
 }

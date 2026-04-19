@@ -16,7 +16,22 @@
       "Bash(awk '{print $NF}')",
       "Bash(find */src/main -name \"*Exception*\" -o -name \"*Handler*\")",
       "Bash(cd /c/Users/kimho/IdeaProjects/spring-ai-agents-tutorial echo \"=== Integration Tests \\(if any\\) ===\")",
-      "Bash(find */src/test -name \"*IT.java\" -o -name \"*IntegrationTest.java\")"
+      "Bash(find */src/test -name \"*IT.java\" -o -name \"*IntegrationTest.java\")",
+      "Bash(xargs -I{} jar -tf {})",
+      "Bash(jar -tf ~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar)",
+      "Bash(grep -v \"\\\\$\")",
+      "Bash(grep \"\\\\.class$\")",
+      "Bash(grep \"\\\\.jar$\")",
+      "Bash(xargs grep *)",
+      "Bash(xargs head *)",
+      "Bash(grep \"class$\")",
+      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar' org.springframework.ai.chat.client.ChatClientRequest)",
+      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar' org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor)",
+      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-advisors-vector-store/1.0.0/spring-ai-advisors-vector-store-1.0.0.jar' org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor)",
+      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar' org.springframework.ai.chat.client.advisor.api.CallAdvisorChain)",
+      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar' org.springframework.ai.chat.client.ChatClientResponse)",
+      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar' org.springframework.ai.chat.client.advisor.api.BaseAdvisor)",
+      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-model/1.0.0/spring-ai-model-1.0.0.jar' org.springframework.ai.chat.prompt.Prompt)"
     ]
   }
 }

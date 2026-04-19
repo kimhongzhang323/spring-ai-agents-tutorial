@@ -1,0 +1,2 @@
+spring.ai.autoconfigure.exclude:
+  - org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration

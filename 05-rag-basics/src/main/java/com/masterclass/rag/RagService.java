@@ -2,7 +2,7 @@ package com.masterclass.rag;
 
 import com.masterclass.shared.guardrails.InputValidator;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
@@ -32,11 +32,12 @@ public class RagService {
         this.chatClient = builder
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
-                        new QuestionAnswerAdvisor(vectorStore,
-                                SearchRequest.builder()
+                        QuestionAnswerAdvisor.builder(vectorStore)
+                                .searchRequest(SearchRequest.builder()
                                         .topK(props.topK())
                                         .similarityThreshold(props.similarityThreshold())
-                                        .build()))
+                                        .build())
+                                .build())
                 .build();
     }
 

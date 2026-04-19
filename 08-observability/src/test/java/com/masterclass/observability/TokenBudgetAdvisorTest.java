@@ -3,11 +3,11 @@ package com.masterclass.observability;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.chat.client.advisor.api.AdvisedRequest;
-import org.springframework.ai.chat.client.advisor.api.AdvisedResponse;
-import org.springframework.ai.chat.client.advisor.api.CallAroundAdvisorChain;
-import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
  *
  * These tests demonstrate how to verify BLOCKING behaviour in a Spring AI advisor:
  * if the advisor throws, the LLM chain should NEVER be called (verified via
- * {@code verify(chain, never()).nextAroundCall(any())}).
+ * {@code verify(chain, never()).nextCall(any())}).
  */
 class TokenBudgetAdvisorTest {
 
@@ -35,40 +35,40 @@ class TokenBudgetAdvisorTest {
 
     @Test
     void shortMessagePassesThroughToChain() {
-        var chain = mock(CallAroundAdvisorChain.class);
+        var chain = mock(CallAdvisorChain.class);
         var response = mockResponse();
-        when(chain.nextAroundCall(any())).thenReturn(response);
+        when(chain.nextCall(any())).thenReturn(response);
 
-        AdvisedRequest request = requestWithUserText("Hello, how are you?");
-        AdvisedResponse result = advisor.aroundCall(request, chain);
+        ChatClientRequest request = requestWithUserText("Hello, how are you?");
+        ChatClientResponse result = advisor.adviseCall(request, chain);
 
         assertThat(result).isNotNull();
-        verify(chain).nextAroundCall(any());
+        verify(chain).nextCall(any());
     }
 
     @Test
     void massiveInputIsRejectedBeforeLlmCall() {
-        var chain = mock(CallAroundAdvisorChain.class);
+        var chain = mock(CallAdvisorChain.class);
         // 8001 tokens × 4 chars = 32,004 chars — exceeds 8000 token budget
         String hugeInput = "a".repeat(32_004 * 4);
 
-        AdvisedRequest request = requestWithUserText(hugeInput);
+        ChatClientRequest request = requestWithUserText(hugeInput);
 
-        assertThatThrownBy(() -> advisor.aroundCall(request, chain))
+        assertThatThrownBy(() -> advisor.adviseCall(request, chain))
                 .isInstanceOf(TokenBudgetAdvisor.TokenBudgetExceededException.class)
                 .hasMessageContaining("input token budget");
 
         // The chain must NOT be called when the budget is exceeded
-        verify(chain, never()).nextAroundCall(any());
+        verify(chain, never()).nextCall(any());
     }
 
     @Test
     void inputBudgetExceededMetricIsIncrementedOnRejection() {
-        var chain = mock(CallAroundAdvisorChain.class);
+        var chain = mock(CallAdvisorChain.class);
         String hugeInput = "x".repeat(200_000); // definitely over budget
 
         try {
-            advisor.aroundCall(requestWithUserText(hugeInput), chain);
+            advisor.adviseCall(requestWithUserText(hugeInput), chain);
         } catch (TokenBudgetAdvisor.TokenBudgetExceededException ignored) {}
 
         double count = registry.find("llm.budget.exceeded")
@@ -80,10 +80,10 @@ class TokenBudgetAdvisorTest {
 
     @Test
     void inputBudgetMetricNotIncrementedForNormalRequests() {
-        var chain = mock(CallAroundAdvisorChain.class);
-        when(chain.nextAroundCall(any())).thenReturn(mockResponse());
+        var chain = mock(CallAdvisorChain.class);
+        when(chain.nextCall(any())).thenReturn(mockResponse());
 
-        advisor.aroundCall(requestWithUserText("Normal message"), chain);
+        advisor.adviseCall(requestWithUserText("Normal message"), chain);
 
         double count = registry.find("llm.budget.exceeded")
                 .tag("direction", "input")
@@ -94,8 +94,6 @@ class TokenBudgetAdvisorTest {
 
     @Test
     void advisorRunsBeforeObservabilityAdvisor() {
-        // TokenBudgetAdvisor must run before ObservabilityAdvisor (MIN_VALUE)
-        // so rejected requests don't generate misleading success spans
         var observabilityAdvisor = new ObservabilityAdvisor(
                 io.micrometer.observation.ObservationRegistry.NOOP, registry);
 
@@ -103,35 +101,24 @@ class TokenBudgetAdvisorTest {
     }
 
     @Test
-    void systemTextIsIncludedInTokenEstimate() {
-        var chain = mock(CallAroundAdvisorChain.class);
-        // Build a request with large system text that pushes over the budget
-        String largeSystemText = "s".repeat(200_000);
+    void largeSystemTextIsIncludedInTokenEstimate() {
+        var chain = mock(CallAdvisorChain.class);
+        // Build a Prompt with a very large system message
+        String largeText = "s".repeat(200_000);
+        var prompt = new Prompt(new org.springframework.ai.chat.messages.SystemMessage(largeText));
+        ChatClientRequest request = new ChatClientRequest(prompt, java.util.Map.of());
 
-        AdvisedRequest request = AdvisedRequest.builder()
-                .systemText(largeSystemText)
-                .userText("short user message")
-                .messages(List.of())
-                .advisors(List.of())
-                .advisorParams(java.util.Map.of())
-                .build();
-
-        assertThatThrownBy(() -> advisor.aroundCall(request, chain))
+        assertThatThrownBy(() -> advisor.adviseCall(request, chain))
                 .isInstanceOf(TokenBudgetAdvisor.TokenBudgetExceededException.class);
 
-        verify(chain, never()).nextAroundCall(any());
+        verify(chain, never()).nextCall(any());
     }
 
-    private AdvisedRequest requestWithUserText(String text) {
-        return AdvisedRequest.builder()
-                .userText(text)
-                .messages(List.of())
-                .advisors(List.of())
-                .advisorParams(java.util.Map.of())
-                .build();
+    private ChatClientRequest requestWithUserText(String text) {
+        return new ChatClientRequest(new Prompt(text), java.util.Map.of());
     }
 
-    private AdvisedResponse mockResponse() {
-        return new AdvisedResponse(mock(ChatResponse.class), java.util.Map.of());
+    private ChatClientResponse mockResponse() {
+        return new ChatClientResponse(mock(ChatResponse.class), java.util.Map.of());
     }
 }

@@ -2,7 +2,7 @@ package com.masterclass.support;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -37,8 +37,9 @@ public class SupportAgentService {
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
                         new MessageChatMemoryAdvisor(new InMemoryChatMemory()),
-                        new QuestionAnswerAdvisor(vectorStore,
-                                SearchRequest.builder().topK(3).similarityThreshold(0.6).build()),
+                        QuestionAnswerAdvisor.builder(vectorStore)
+                                .searchRequest(SearchRequest.builder().topK(3).similarityThreshold(0.6).build())
+                                .build(),
                         new SimpleLoggerAdvisor()
                 )
                 .defaultTools(tools)

@@ -6,9 +6,9 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.chat.client.advisor.api.AdvisedRequest;
-import org.springframework.ai.chat.client.advisor.api.AdvisedResponse;
-import org.springframework.ai.chat.client.advisor.api.CallAroundAdvisorChain;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -42,11 +42,11 @@ class ObservabilityAdvisorTest {
 
     @Test
     void incrementsCallCounterOnSuccessfulCall() {
-        var chain = mock(CallAroundAdvisorChain.class);
+        var chain = mock(CallAdvisorChain.class);
         var response = mockSuccessResponse();
-        when(chain.nextAroundCall(any())).thenReturn(response);
+        when(chain.nextCall(any())).thenReturn(response);
 
-        advisor.aroundCall(mock(AdvisedRequest.class), chain);
+        advisor.adviseCall(mock(ChatClientRequest.class), chain);
 
         Counter callCounter = meterRegistry.find("llm.calls.total").counter();
         assertThat(callCounter).isNotNull();
@@ -55,12 +55,12 @@ class ObservabilityAdvisorTest {
 
     @Test
     void callCounterAccumulatesAcrossMultipleCalls() {
-        var chain = mock(CallAroundAdvisorChain.class);
-        when(chain.nextAroundCall(any())).thenReturn(mockSuccessResponse());
+        var chain = mock(CallAdvisorChain.class);
+        when(chain.nextCall(any())).thenReturn(mockSuccessResponse());
 
-        advisor.aroundCall(mock(AdvisedRequest.class), chain);
-        advisor.aroundCall(mock(AdvisedRequest.class), chain);
-        advisor.aroundCall(mock(AdvisedRequest.class), chain);
+        advisor.adviseCall(mock(ChatClientRequest.class), chain);
+        advisor.adviseCall(mock(ChatClientRequest.class), chain);
+        advisor.adviseCall(mock(ChatClientRequest.class), chain);
 
         Counter callCounter = meterRegistry.find("llm.calls.total").counter();
         assertThat(callCounter.count()).isEqualTo(3.0);
@@ -68,10 +68,10 @@ class ObservabilityAdvisorTest {
 
     @Test
     void incrementsErrorCounterWhenChainThrows() {
-        var chain = mock(CallAroundAdvisorChain.class);
-        when(chain.nextAroundCall(any())).thenThrow(new RuntimeException("LLM timeout"));
+        var chain = mock(CallAdvisorChain.class);
+        when(chain.nextCall(any())).thenThrow(new RuntimeException("LLM timeout"));
 
-        assertThatThrownBy(() -> advisor.aroundCall(mock(AdvisedRequest.class), chain))
+        assertThatThrownBy(() -> advisor.adviseCall(mock(ChatClientRequest.class), chain))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("LLM timeout");
 
@@ -82,10 +82,10 @@ class ObservabilityAdvisorTest {
 
     @Test
     void doesNotIncrementErrorCounterOnSuccess() {
-        var chain = mock(CallAroundAdvisorChain.class);
-        when(chain.nextAroundCall(any())).thenReturn(mockSuccessResponse());
+        var chain = mock(CallAdvisorChain.class);
+        when(chain.nextCall(any())).thenReturn(mockSuccessResponse());
 
-        advisor.aroundCall(mock(AdvisedRequest.class), chain);
+        advisor.adviseCall(mock(ChatClientRequest.class), chain);
 
         Counter errorCounter = meterRegistry.find("llm.errors.total").counter();
         assertThat(errorCounter.count()).isZero();
@@ -93,15 +93,15 @@ class ObservabilityAdvisorTest {
 
     @Test
     void errorCounterIncrementedOnlyForFailures() {
-        var chain = mock(CallAroundAdvisorChain.class);
-        when(chain.nextAroundCall(any()))
+        var chain = mock(CallAdvisorChain.class);
+        when(chain.nextCall(any()))
                 .thenReturn(mockSuccessResponse())   // call 1: success
                 .thenThrow(new RuntimeException("fail")) // call 2: fail
                 .thenReturn(mockSuccessResponse());  // call 3: success
 
-        advisor.aroundCall(mock(AdvisedRequest.class), chain);
-        try { advisor.aroundCall(mock(AdvisedRequest.class), chain); } catch (Exception ignored) {}
-        advisor.aroundCall(mock(AdvisedRequest.class), chain);
+        advisor.adviseCall(mock(ChatClientRequest.class), chain);
+        try { advisor.adviseCall(mock(ChatClientRequest.class), chain); } catch (Exception ignored) {}
+        advisor.adviseCall(mock(ChatClientRequest.class), chain);
 
         assertThat(meterRegistry.find("llm.calls.total").counter().count()).isEqualTo(3.0);
         assertThat(meterRegistry.find("llm.errors.total").counter().count()).isEqualTo(1.0);
@@ -119,20 +119,20 @@ class ObservabilityAdvisorTest {
 
     @Test
     void exceptionIsRethrowedAfterMetricRecording() {
-        var chain = mock(CallAroundAdvisorChain.class);
+        var chain = mock(CallAdvisorChain.class);
         var cause = new IllegalStateException("provider quota exceeded");
-        when(chain.nextAroundCall(any())).thenThrow(cause);
+        when(chain.nextCall(any())).thenThrow(cause);
 
-        assertThatThrownBy(() -> advisor.aroundCall(mock(AdvisedRequest.class), chain))
+        assertThatThrownBy(() -> advisor.adviseCall(mock(ChatClientRequest.class), chain))
                 .isSameAs(cause);
     }
 
-    private AdvisedResponse mockSuccessResponse() {
+    private ChatClientResponse mockSuccessResponse() {
         var chatResponse = mock(ChatResponse.class);
         var metadata = ChatResponseMetadata.builder()
                 .usage(new DefaultUsage(100L, 50L))
                 .build();
         when(chatResponse.getMetadata()).thenReturn(metadata);
-        return new AdvisedResponse(chatResponse, java.util.Map.of());
+        return new ChatClientResponse(chatResponse, java.util.Map.of());
     }
 }

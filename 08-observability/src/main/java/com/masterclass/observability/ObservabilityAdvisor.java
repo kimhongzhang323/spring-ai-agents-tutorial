@@ -6,10 +6,10 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.advisor.api.AdvisedRequest;
-import org.springframework.ai.chat.client.advisor.api.AdvisedResponse;
-import org.springframework.ai.chat.client.advisor.api.CallAroundAdvisor;
-import org.springframework.ai.chat.client.advisor.api.CallAroundAdvisorChain;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
  * Wiring: add to ChatClient.Builder via .defaultAdvisors(observabilityAdvisor)
  */
 @Component
-public class ObservabilityAdvisor implements CallAroundAdvisor {
+public class ObservabilityAdvisor implements CallAdvisor {
 
     private static final Logger log = LoggerFactory.getLogger(ObservabilityAdvisor.class);
 
@@ -57,7 +57,7 @@ public class ObservabilityAdvisor implements CallAroundAdvisor {
     }
 
     @Override
-    public AdvisedResponse aroundCall(AdvisedRequest request, CallAroundAdvisorChain chain) {
+    public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
         llmCallCounter.increment();
 
         var observation = Observation.createNotStarted("llm.call", observationRegistry)
@@ -66,15 +66,15 @@ public class ObservabilityAdvisor implements CallAroundAdvisor {
 
         try {
             long start = System.currentTimeMillis();
-            AdvisedResponse response = chain.nextAroundCall(request);
+            ChatClientResponse response = chain.nextCall(request);
             long latencyMs = System.currentTimeMillis() - start;
 
             observation.lowCardinalityKeyValue("status", "success");
             log.debug("LLM call completed in {}ms", latencyMs);
 
             // Log token usage from the response metadata if available
-            if (response.response() != null && response.response().getMetadata() != null) {
-                var usage = response.response().getMetadata().getUsage();
+            if (response.chatResponse() != null && response.chatResponse().getMetadata() != null) {
+                var usage = response.chatResponse().getMetadata().getUsage();
                 if (usage != null) {
                     log.debug("Token usage — prompt: {}, completion: {}, total: {}",
                             usage.getPromptTokens(), usage.getGenerationTokens(), usage.getTotalTokens());
