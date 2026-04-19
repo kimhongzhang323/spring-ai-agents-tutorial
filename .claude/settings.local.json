@@ -12,7 +12,11 @@
       "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn dependency:resolve -pl shared)",
       "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn -q compile -pl shared)",
       "Bash(jar tf *)",
-      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn dependency:resolve -pl 05-rag-basics)"
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn dependency:resolve -pl 05-rag-basics)",
+      "Bash(awk '{print $NF}')",
+      "Bash(find */src/main -name \"*Exception*\" -o -name \"*Handler*\")",
+      "Bash(cd /c/Users/kimho/IdeaProjects/spring-ai-agents-tutorial echo \"=== Integration Tests \\(if any\\) ===\")",
+      "Bash(find */src/test -name \"*IT.java\" -o -name \"*IntegrationTest.java\")"
     ]
   }
 }
