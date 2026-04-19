@@ -1,0 +1,32 @@
+spring:
+  application.name: observability
+  ai:
+    openai.api-key: ${OPENAI_API_KEY:not-configured}
+    ollama.base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+
+app:
+  security.jwt:
+    secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits-long}
+    expiration-ms: 3600000
+  rate-limit:
+    capacity-per-user: 20
+    refill-tokens-per-minute: 20
+    global-capacity: 200
+    global-refill-tokens-per-minute: 200
+
+management:
+  endpoints.web.exposure.include: health,info,prometheus,metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling.probability: 1.0   # 100% sampling in dev; set 0.1 in production
+
+# OTLP exporter — sends traces to Jaeger
+otel:
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}
+  service.name: ${spring.application.name}
+
+springdoc.swagger-ui.path: /swagger-ui.html

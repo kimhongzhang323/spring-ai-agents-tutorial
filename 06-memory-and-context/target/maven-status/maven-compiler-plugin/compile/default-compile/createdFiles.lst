@@ -1,1 +1,9 @@
+com\masterclass\memory\ConversationService.class
+com\masterclass\memory\RedisMessageStore.class
+com\masterclass\memory\MemoryApplication.class
+com\masterclass\memory\MemoryProperties.class
 com\masterclass\memory\ConversationController.class
+com\masterclass\memory\SummarizingMemoryService.class
+com\masterclass\memory\ConversationService$ConversationTurn.class
+com\masterclass\memory\SummarizingMemoryService$1.class
+com\masterclass\memory\RedisMessageStore$1.class

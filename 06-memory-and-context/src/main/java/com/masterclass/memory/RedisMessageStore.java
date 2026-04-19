@@ -60,11 +60,8 @@ public class RedisMessageStore implements ChatMemory {
     }
 
     @Override
-    public List<Message> get(String conversationId, int lastN) {
-        String key = KEY_PREFIX + conversationId;
-        List<Message> all = getOrEmpty(key);
-        if (lastN <= 0 || lastN >= all.size()) return all;
-        return all.subList(all.size() - lastN, all.size());
+    public List<Message> get(String conversationId) {
+        return getOrEmpty(KEY_PREFIX + conversationId);
     }
 
     @Override

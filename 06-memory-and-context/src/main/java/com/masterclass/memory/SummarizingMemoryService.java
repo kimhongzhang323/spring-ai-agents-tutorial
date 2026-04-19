@@ -67,7 +67,7 @@ public class SummarizingMemoryService {
         String scopedId = userId + ":" + conversationId;
 
         // Load current history
-        List<Message> history = new ArrayList<>(messageStore.get(scopedId, Integer.MAX_VALUE));
+        List<Message> history = new ArrayList<>(messageStore.get(scopedId));
 
         // Compress if over threshold
         if (history.size() >= SUMMARIZE_THRESHOLD) {

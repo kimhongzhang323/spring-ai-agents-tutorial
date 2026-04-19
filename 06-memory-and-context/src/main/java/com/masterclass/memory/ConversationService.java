@@ -3,6 +3,7 @@ package com.masterclass.memory;
 import com.masterclass.shared.guardrails.InputValidator;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -25,7 +26,7 @@ public class ConversationService {
                  *
                  * The CONVERSATION_ID is the key used to look up the right history in Redis.
                  */
-                .defaultAdvisors(new MessageChatMemoryAdvisor(memory))
+                .defaultAdvisors(MessageChatMemoryAdvisor.builder(memory).build())
                 .build();
     }
 
@@ -38,7 +39,7 @@ public class ConversationService {
 
         String reply = chatClient.prompt()
                 .user(message)
-                .advisors(a -> a.param(MessageChatMemoryAdvisor.CONVERSATION_ID_KEY, scopedId))
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, scopedId))
                 .call()
                 .content();
 

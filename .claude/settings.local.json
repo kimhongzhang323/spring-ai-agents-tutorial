@@ -31,7 +31,19 @@
       "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar' org.springframework.ai.chat.client.advisor.api.CallAdvisorChain)",
       "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar' org.springframework.ai.chat.client.ChatClientResponse)",
       "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-client-chat/1.0.0/spring-ai-client-chat-1.0.0.jar' org.springframework.ai.chat.client.advisor.api.BaseAdvisor)",
-      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-model/1.0.0/spring-ai-model-1.0.0.jar' org.springframework.ai.chat.prompt.Prompt)"
+      "Bash(javap -cp '~/.m2/repository/org/springframework/ai/spring-ai-model/1.0.0/spring-ai-model-1.0.0.jar' org.springframework.ai.chat.prompt.Prompt)",
+      "Bash(javap -p /C/Users/kimho/.m2/repository/org/springframework/ai/spring-ai-core/1.0.0-M4/spring-ai-core-1.0.0-M4.jar org.springframework.ai.chat.memory.ChatMemory)",
+      "Bash(jar xf *)",
+      "Bash(javap -p /tmp/org/springframework/ai/chat/memory/ChatMemory.class)",
+      "Read(//c/tmp/**)",
+      "Bash(javap -p org/springframework/ai/chat/memory/ChatMemory.class)",
+      "Bash(javap -p org/springframework/ai/chat/client/advisor/MessageChatMemoryAdvisor.class)",
+      "Bash(xargs -I{} jar tf {})",
+      "Bash(xargs -I{} sh -c 'jar tf \"$1\" 2>/dev/null | grep -l \"ChatMemory\" && echo \"$1\"' _ {})",
+      "Bash(javap -p 'org/springframework/ai/chat/client/advisor/MessageChatMemoryAdvisor$Builder.class')",
+      "Bash(javap -p org/springframework/ai/chat/client/advisor/api/BaseChatMemoryAdvisor.class)",
+      "Bash(javac -version)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-21\" mvn -pl shared,06-memory-and-context compile -q)"
     ]
   }
 }
