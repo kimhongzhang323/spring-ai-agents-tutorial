@@ -50,9 +50,9 @@ class OrchestratorAgentServiceTest {
         var chatClient = mock(ChatClient.class);
         var promptSpec = mock(ChatClient.ChatClientRequestSpec.class);
         var callSpec = mock(ChatClient.CallResponseSpec.class);
-        var chatResponse = mock(org.springframework.ai.chat.client.ChatClientResponse.class);
-        var metadata = mock(org.springframework.ai.chat.client.ChatClientResponse.Metadata.class);
-        var usage = new DefaultUsage(100L, 50L);
+        var chatModelResp = mock(org.springframework.ai.chat.model.ChatResponse.class);
+        var respMetadata = mock(org.springframework.ai.chat.metadata.ChatResponseMetadata.class);
+        var usage = new DefaultUsage(100, 50);
 
         when(chatClientBuilder.build()).thenReturn(chatClient);
         when(chatClient.prompt()).thenReturn(promptSpec);
@@ -61,9 +61,10 @@ class OrchestratorAgentServiceTest {
         when(promptSpec.tools(any(Object[].class))).thenReturn(promptSpec);
         when(promptSpec.call()).thenReturn(callSpec);
         when(callSpec.content()).thenReturn("Integration test successful");
-        when(callSpec.chatClientResponse()).thenReturn(chatResponse);
-        when(chatResponse.metadata()).thenReturn(metadata);
-        when(metadata.getUsage()).thenReturn(usage);
+        when(callSpec.chatResponse()).thenReturn(chatModelResp);
+        when(chatModelResp.getMetadata()).thenReturn(respMetadata);
+        when(respMetadata.getUsage()).thenReturn(usage);
+        when(respMetadata.getUsage()).thenReturn(usage);
 
         // We test the call() path — stub both content() and metadata()
         when(callSpec.content()).thenReturn("I routed your message to Kafka successfully.");

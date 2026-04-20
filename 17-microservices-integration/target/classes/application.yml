@@ -177,3 +177,9 @@ springdoc:
 batch:
   max-size: 5              # flush when this many requests accumulate
   drain-interval-ms: 500   # also flush every 500 ms (whichever fires first)
+
+# ── Semantic Response Cache ───────────────────────────────────────────────────
+cache:
+  semantic:
+    similarity-threshold: 0.92  # cosine score >= this = cache hit (tune 0.85–0.95)
+    ttl-minutes: 60             # entries expire after 1 hour

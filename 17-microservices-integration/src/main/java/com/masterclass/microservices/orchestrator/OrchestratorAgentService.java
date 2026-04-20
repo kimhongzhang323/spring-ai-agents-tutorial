@@ -199,8 +199,8 @@ public class OrchestratorAgentService {
                     .call();
 
             String content = response.content();
-            var chatResponse = response.chatClientResponse();
-            Usage usage = chatResponse.metadata().getUsage();
+            var chatResponse = response.chatResponse();
+            Usage usage = chatResponse.getMetadata().getUsage();
 
             log.debug("OrchestratorAgent completed: promptTokens={} completionTokens={}",
                     usage.getPromptTokens(), usage.getCompletionTokens());

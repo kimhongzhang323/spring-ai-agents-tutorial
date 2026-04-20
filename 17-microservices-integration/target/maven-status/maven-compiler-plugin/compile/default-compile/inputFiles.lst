@@ -1,6 +1,10 @@
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\cache\hazelcast\HazelcastConfig.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\cache\hazelcast\HazelcastTool.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\cache\redis\CachedChatController.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\cache\redis\CachedEntry.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\cache\redis\CacheHit.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\cache\redis\RedisSemanticCacheTool.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\cache\redis\SemanticResponseCache.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\databases\cassandra\CassandraTool.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\databases\clickhouse\ClickHouseTool.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\databases\dynamodb\DynamoDbConfig.java

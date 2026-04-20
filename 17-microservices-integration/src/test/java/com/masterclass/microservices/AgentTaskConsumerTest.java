@@ -33,7 +33,7 @@ class AgentTaskConsumerTest {
         verify(rabbitTemplate).convertAndSend(
                 eq("agent.exchange"),
                 eq("agent.task.result"),
-                argThat(msg -> msg.toString().contains("FULFILL_ORDER")));
+                (Object) argThat(msg -> msg.toString().contains("FULFILL_ORDER")));
     }
 
     @Test

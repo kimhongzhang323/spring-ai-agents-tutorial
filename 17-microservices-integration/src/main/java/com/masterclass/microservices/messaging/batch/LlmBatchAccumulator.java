@@ -74,7 +74,7 @@ public class LlmBatchAccumulator {
      * Ensures slow trickles are never stuck waiting forever.
      */
     @Scheduled(fixedDelayString = "${batch.drain-interval-ms:500}")
-    void drainAndProcess() {
+    public void drainAndProcess() {
         if (queue.isEmpty()) return;
 
         List<BatchRequest> batch = new ArrayList<>(maxBatchSize);

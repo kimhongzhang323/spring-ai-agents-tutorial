@@ -1,0 +1,7 @@
+com\masterclass\microservices\DemoScenarioServiceTest.class
+com\masterclass\microservices\LlmBatchAccumulatorTest.class
+com\masterclass\microservices\OrchestratorAgentServiceTest.class
+com\masterclass\microservices\OrchestratorControllerIT.class
+com\masterclass\microservices\SemanticResponseCacheTest.class
+com\masterclass\microservices\StreamingAgentServiceTest.class
+com\masterclass\microservices\AgentTaskConsumerTest.class
