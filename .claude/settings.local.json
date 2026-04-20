@@ -51,7 +51,9 @@
       "Read(//c/Program Files/Java//**)",
       "Bash(find /c -name \"java.exe\" -path \"*/jdk-21*\")",
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn test -pl 17-microservices-integration -Dtest=\"DemoScenarioServiceTest,StreamingAgentServiceTest,AgentTaskConsumerTest,OrchestratorAgentServiceTest\" --no-transfer-progress)",
-      "Bash(javap -cp /c/Users/kimho/.m2/repository/io/dapr/dapr-sdk/1.12.0/dapr-sdk-1.12.0.jar io.dapr.client.domain.HttpExtension)"
+      "Bash(javap -cp /c/Users/kimho/.m2/repository/io/dapr/dapr-sdk/1.12.0/dapr-sdk-1.12.0.jar io.dapr.client.domain.HttpExtension)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Oracle/Java/javapath/..\" mvn test -pl 17-microservices-integration -Dtest=LlmBatchAccumulatorTest -q)",
+      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn test -pl 17-microservices-integration -Dtest=LlmBatchAccumulatorTest -q)"
     ]
   }
 }

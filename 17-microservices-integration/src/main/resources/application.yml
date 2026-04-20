@@ -172,3 +172,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     tags-sorter: alpha
+
+# ── LLM Batch Queue ───────────────────────────────────────────────────────────
+batch:
+  max-size: 5              # flush when this many requests accumulate
+  drain-interval-ms: 500   # also flush every 500 ms (whichever fires first)

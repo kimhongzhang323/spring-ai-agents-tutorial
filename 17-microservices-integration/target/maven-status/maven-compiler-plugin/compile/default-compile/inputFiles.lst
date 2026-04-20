@@ -16,6 +16,12 @@ C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integrati
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\enterprise\integration\SpringIntegrationTool.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\activemq\ActiveMqTool.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\azure\AzureServiceBusTool.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\batch\BatchController.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\batch\BatchJobResult.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\batch\BatchJobStatus.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\batch\BatchRequest.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\batch\LlmBatchAccumulator.java
+C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\batch\LlmBatchProcessor.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\kafka\KafkaEventEnricher.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\kafka\KafkaTool.java
 C:\Users\kimho\IdeaProjects\spring-ai-agents-tutorial\17-microservices-integration\src\main\java\com\masterclass\microservices\messaging\kafka\KafkaTopicConfig.java
