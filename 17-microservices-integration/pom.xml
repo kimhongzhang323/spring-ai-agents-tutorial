@@ -128,10 +128,10 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
-        <!-- Pulsar -->
+        <!-- Pulsar (Spring Boot 3.3+ includes spring-pulsar in the BOM) -->
         <dependency>
-            <groupId>org.springframework.pulsar</groupId>
-            <artifactId>spring-pulsar-spring-boot-starter</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-pulsar</artifactId>
         </dependency>
         <!-- ActiveMQ Artemis (JMS 2.0) -->
         <dependency>
@@ -219,7 +219,7 @@
         <dependency>
             <groupId>io.temporal</groupId>
             <artifactId>temporal-spring-boot-starter-alpha</artifactId>
-            <version>${temporal.version}</version>
+            <version>1.22.3</version>
         </dependency>
 
         <!-- ==================== Apache Camel ==================== -->
@@ -235,7 +235,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-rabbitmq-starter</artifactId>
+            <artifactId>camel-spring-rabbitmq-starter</artifactId>
             <version>4.8.0</version>
         </dependency>
 
@@ -322,7 +322,7 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>cassandraunit</artifactId>
+            <artifactId>cassandra</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -344,6 +344,17 @@
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Required for gRPC generated code: javax.annotation.Generated -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
         </dependency>
     </dependencies>
 

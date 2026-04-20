@@ -1,0 +1,9 @@
+spring:
+  ai:
+    openai:
+      api-key: not-configured
+    ollama:
+      base-url: http://localhost:11434
+
+# All services run via docker-compose.yml in this module
+# Run: docker compose up -d

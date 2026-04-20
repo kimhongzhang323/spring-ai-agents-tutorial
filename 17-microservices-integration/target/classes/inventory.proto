@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option java_package = "com.masterclass.microservices.servicemesh.grpc";
+option java_outer_classname = "InventoryProto";
+option java_multiple_files = true;
+
+package inventory;
+
+service InventoryService {
+  rpc CheckStock (StockRequest) returns (StockResponse);
+  rpc ReserveItem (ReserveRequest) returns (ReserveResponse);
+}
+
+message StockRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message StockResponse {
+  string product_id = 1;
+  int32 available = 2;
+  bool in_stock = 3;
+}
+
+message ReserveRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+  string reservation_id = 3;
+}
+
+message ReserveResponse {
+  string reservation_id = 1;
+  bool success = 2;
+  string message = 3;
+}

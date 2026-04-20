@@ -1,6 +1,7 @@
 package com.masterclass.microservices.servicemesh.dapr;
 
 import io.dapr.client.DaprClient;
+import io.dapr.client.DaprHttp;
 import io.dapr.client.domain.HttpExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +51,15 @@ public class DaprTool {
             """)
     public String invokeViaDapr(String appId, String method, String path, String body) {
         try {
+            HttpExtension httpExtension = switch (method.toUpperCase()) {
+                case "POST" -> HttpExtension.POST;
+                case "PUT" -> HttpExtension.PUT;
+                case "DELETE" -> HttpExtension.DELETE;
+                default -> HttpExtension.GET;
+            };
             String result = daprClient.invokeMethod(
                     appId, path, body.isEmpty() ? null : body,
-                    HttpExtension.valueOf(method), String.class).block();
+                    httpExtension, String.class).block();
             log.debug("Dapr service invoke: appId={} method={} path={}", appId, method, path);
             return result != null ? result : "{}";
         } catch (Exception e) {

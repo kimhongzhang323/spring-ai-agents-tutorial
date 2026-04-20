@@ -35,8 +35,8 @@ public class IntegrationConfig {
                 .<String, Boolean>route(
                         msg -> msg.contains("urgent"),
                         mapping -> mapping
-                                .when(true, c -> c.channel("agentOutputChannel"))
-                                .defaultOutputChannel("agentOutputChannel"))
+                                .subFlowMapping(Boolean.TRUE, sf -> sf.channel(agentOutputChannel()))
+                                .defaultOutputChannel(agentOutputChannel()))
                 .get();
     }
 }

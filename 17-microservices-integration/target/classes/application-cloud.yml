@@ -1,0 +1,10 @@
+spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+
+# All connection strings come from environment variables in cloud profile
+# Inject via Kubernetes secrets or Spring Cloud Config
