@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: parallel-agent-teams
+  threads:
+    virtual:
+      enabled: true   # Java 21 virtual threads for all server and async tasks
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+
+parallel-team:
+  max-concurrent-agents: 8
+  agent-timeout-seconds: 60
+  sse-heartbeat-seconds: 5
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: llama3.2
+
+---
+spring:
+  config:
+    activate:
+      on-profile: cloud
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
