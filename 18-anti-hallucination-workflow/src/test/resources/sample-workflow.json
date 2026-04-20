@@ -1,0 +1,41 @@
+{
+  "name": "grounding-demo",
+  "abortOnFirstFailure": true,
+  "steps": [
+    {
+      "name": "research",
+      "type": "AGENT",
+      "promptTemplate": "Summarise the key facts about the French Revolution in 3 bullet points.",
+      "groundingDocs": [
+        "The French Revolution began in 1789 and ended in 1799.",
+        "Key causes included financial crisis, social inequality, and Enlightenment ideas.",
+        "The Revolution led to the execution of King Louis XVI in 1793 and the rise of Napoleon Bonaparte."
+      ],
+      "consistencySamples": 1,
+      "guardEnabled": true,
+      "targetContextKey": null
+    },
+    {
+      "name": "verify-research",
+      "type": "GUARD",
+      "promptTemplate": null,
+      "groundingDocs": [
+        "The French Revolution began in 1789 and ended in 1799.",
+        "Key causes included financial crisis, social inequality, and Enlightenment ideas.",
+        "The Revolution led to the execution of King Louis XVI in 1793 and the rise of Napoleon Bonaparte."
+      ],
+      "consistencySamples": 1,
+      "guardEnabled": false,
+      "targetContextKey": "research"
+    },
+    {
+      "name": "conclusion",
+      "type": "AGENT",
+      "promptTemplate": "Based on this research: {{research}}\n\nWrite a one-sentence conclusion.",
+      "groundingDocs": [],
+      "consistencySamples": 1,
+      "guardEnabled": false,
+      "targetContextKey": null
+    }
+  ]
+}

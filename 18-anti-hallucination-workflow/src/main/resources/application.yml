@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: anti-hallucination-workflow
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+server:
+  port: 8080
+
+# Anti-hallucination configuration
+anti-hallucination:
+  guard:
+    faithfulness-threshold: 0.70
+    confidence-threshold: 0.65
+    judge-model: ${JUDGE_MODEL:gpt-4o-mini}
+    max-retries: 2
+  self-consistency:
+    default-samples: 3
+    temperature: 0.7
+  workflow:
+    human-pause-timeout-seconds: 300
+    context-ttl-seconds: 3600
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+resilience4j:
+  retry:
+    instances:
+      llm-call:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+
+logging:
+  level:
+    com.masterclass.antihallucination: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: llama3.2
+
+anti-hallucination:
+  guard:
+    judge-model: llama3.2:1b
+
+---
+spring:
+  config:
+    activate:
+      on-profile: cloud
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+
+anti-hallucination:
+  guard:
+    judge-model: gpt-4o-mini

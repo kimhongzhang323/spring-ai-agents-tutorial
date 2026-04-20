@@ -33,6 +33,7 @@
         <module>15-multi-llm-providers</module>
         <module>16-knowledge-graph</module>
         <module>17-microservices-integration</module>
+        <module>18-anti-hallucination-workflow</module>
         <module>examples/customer-support-agent</module>
         <module>examples/banking-assistant</module>
         <module>examples/research-agent</module>

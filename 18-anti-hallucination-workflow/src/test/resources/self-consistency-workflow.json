@@ -1,0 +1,15 @@
+{
+  "name": "self-consistency-demo",
+  "abortOnFirstFailure": false,
+  "steps": [
+    {
+      "name": "reasoning",
+      "type": "AGENT",
+      "promptTemplate": "Solve step by step: A train travels 300 km in 2 hours. What is its average speed?",
+      "groundingDocs": [],
+      "consistencySamples": 3,
+      "guardEnabled": false,
+      "targetContextKey": null
+    }
+  ]
+}

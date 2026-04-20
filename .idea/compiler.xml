@@ -14,6 +14,7 @@
         <module name="research-agent" />
         <module name="15-multi-llm-providers" />
         <module name="08-observability" />
+        <module name="18-anti-hallucination-workflow" />
         <module name="02-prompt-engineering" />
         <module name="customer-support-agent" />
         <module name="11-langchain4j-agentic" />
