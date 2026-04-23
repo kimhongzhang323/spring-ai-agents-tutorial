@@ -38,7 +38,13 @@ public class ExtractionController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Extracted invoice",
                             content = @Content(schema = @Schema(implementation = InvoiceData.class))),
+                    @ApiResponse(responseCode = "400", description = "Blank or invalid request body",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "401", description = "Missing or invalid JWT",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "422", description = "Extraction failed after retries",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "429", description = "Rate limit exceeded — see Retry-After header",
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
@@ -52,7 +58,15 @@ public class ExtractionController {
             description = "Returns structured sentiment, pros, cons, and inferred rating.",
             responses = {
                     @ApiResponse(responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = ProductReview.class)))
+                            content = @Content(schema = @Schema(implementation = ProductReview.class))),
+                    @ApiResponse(responseCode = "400", description = "Blank or invalid request body",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "401", description = "Missing or invalid JWT",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "422", description = "Extraction failed after retries",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "429", description = "Rate limit exceeded — see Retry-After header",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
     public ResponseEntity<ProductReview> analyzeReview(@Valid @RequestBody AgentRequest request) {
@@ -65,7 +79,15 @@ public class ExtractionController {
             description = "Extracts name, skills, experience, education, and infers years of experience.",
             responses = {
                     @ApiResponse(responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = ResumeData.class)))
+                            content = @Content(schema = @Schema(implementation = ResumeData.class))),
+                    @ApiResponse(responseCode = "400", description = "Blank or invalid request body",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "401", description = "Missing or invalid JWT",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "422", description = "Extraction failed after retries",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "429", description = "Rate limit exceeded — see Retry-After header",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
     public ResponseEntity<ResumeData> extractResume(@Valid @RequestBody AgentRequest request) {

@@ -11,7 +11,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -50,5 +52,32 @@ class ConversationControllerTest {
         mockMvc.perform(post("/api/v1/conversations/new"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.conversationId").value("new-uuid"));
+    }
+
+    @Test
+    @WithMockUser(username = "alice")
+    void blankMessageReturns400() throws Exception {
+        when(conversationService.chat(any(), any(), any()))
+                .thenThrow(new IllegalArgumentException("Message must not be blank"));
+
+        mockMvc.perform(post("/api/v1/conversations/conv-1/chat")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AgentRequest("   "))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "alice")
+    void clearConversationReturns204() throws Exception {
+        doNothing().when(conversationService).clearConversation(any(), any());
+
+        mockMvc.perform(delete("/api/v1/conversations/conv-1"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void clearConversationRequiresAuthentication() throws Exception {
+        mockMvc.perform(delete("/api/v1/conversations/conv-1"))
+                .andExpect(status().isUnauthorized());
     }
 }

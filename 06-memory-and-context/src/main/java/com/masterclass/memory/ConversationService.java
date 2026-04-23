@@ -1,9 +1,11 @@
 package com.masterclass.memory;
 
 import com.masterclass.shared.guardrails.InputValidator;
+import com.masterclass.shared.observability.TokenUsageMetrics;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -13,10 +15,14 @@ public class ConversationService {
 
     private final ChatClient chatClient;
     private final InputValidator inputValidator;
+    private final TokenUsageMetrics tokenUsageMetrics;
+    private final RedisMessageStore memory;
 
     public ConversationService(ChatClient.Builder builder, RedisMessageStore memory,
-                               InputValidator inputValidator) {
+                               InputValidator inputValidator, TokenUsageMetrics tokenUsageMetrics) {
         this.inputValidator = inputValidator;
+        this.tokenUsageMetrics = tokenUsageMetrics;
+        this.memory = memory;
         this.chatClient = builder
                 .defaultSystem("You are a helpful assistant. You remember the context of our conversation.")
                 /*
@@ -37,17 +43,30 @@ public class ConversationService {
         // Scope conversation to user — prevents user A from reading user B's history
         String scopedId = userId + ":" + conversationId;
 
-        String reply = chatClient.prompt()
+        ChatResponse chatResponse = chatClient.prompt()
                 .user(message)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, scopedId))
                 .call()
-                .content();
+                .chatResponse();
 
-        return new ConversationTurn(conversationId, message, reply);
+        var usage = chatResponse.getMetadata().getUsage();
+        if (usage != null) {
+            tokenUsageMetrics.record(
+                usage.getPromptTokens() != null ? usage.getPromptTokens().intValue() : 0,
+                usage.getGenerationTokens() != null ? usage.getGenerationTokens().intValue() : 0
+            );
+        }
+
+        return new ConversationTurn(conversationId, message,
+                chatResponse.getResult().getOutput().getText());
     }
 
     public String newConversationId() {
         return UUID.randomUUID().toString();
+    }
+
+    public void clearConversation(String conversationId, String userId) {
+        memory.clear(userId + ":" + conversationId);
     }
 
     public record ConversationTurn(String conversationId, String userMessage, String assistantReply) {}

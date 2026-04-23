@@ -9,25 +9,27 @@
         <module name="17-microservices-integration" />
         <module name="shared" />
         <module name="16-knowledge-graph" />
-        <module name="05-rag-basics" />
         <module name="banking-assistant" />
-        <module name="research-agent" />
+        <module name="20-ai-security" />
         <module name="15-multi-llm-providers" />
         <module name="08-observability" />
         <module name="18-anti-hallucination-workflow" />
-        <module name="02-prompt-engineering" />
-        <module name="customer-support-agent" />
         <module name="11-langchain4j-agentic" />
-        <module name="09-guardrails" />
         <module name="13-deployment" />
         <module name="00-prerequisites" />
-        <module name="01-hello-agent" />
         <module name="14-mcp-server" />
-        <module name="03-structured-output" />
         <module name="04-tool-calling" />
-        <module name="07-api-management" />
         <module name="06-memory-and-context" />
         <module name="10-multi-agent-supervisor" />
+        <module name="05-rag-basics" />
+        <module name="research-agent" />
+        <module name="02-prompt-engineering" />
+        <module name="customer-support-agent" />
+        <module name="19-parallel-agent-teams" />
+        <module name="09-guardrails" />
+        <module name="01-hello-agent" />
+        <module name="03-structured-output" />
+        <module name="07-api-management" />
         <module name="12-evaluation-and-testing" />
       </profile>
     </annotationProcessing>

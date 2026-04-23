@@ -1,6 +1,7 @@
 package com.masterclass.memory;
 
 import com.masterclass.shared.guardrails.InputValidator;
+import com.masterclass.shared.observability.TokenUsageMetrics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +9,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.metadata.Usage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -40,6 +46,9 @@ class ConversationServiceTest {
     @Mock ChatClient.CallResponseSpec callSpec;
     @Mock RedisMessageStore messageStore;
     @Mock InputValidator inputValidator;
+    @Mock TokenUsageMetrics tokenUsageMetrics;
+    @Mock ChatResponseMetadata responseMetadata;
+    @Mock Usage usage;
 
     ConversationService service;
 
@@ -48,7 +57,17 @@ class ConversationServiceTest {
         when(builder.defaultSystem(anyString())).thenReturn(builder);
         when(builder.defaultAdvisors(any(MessageChatMemoryAdvisor.class))).thenReturn(builder);
         when(builder.build()).thenReturn(chatClient);
-        service = new ConversationService(builder, messageStore, inputValidator);
+        service = new ConversationService(builder, messageStore, inputValidator, tokenUsageMetrics);
+    }
+
+    private ChatResponse stubChatResponse(String text) {
+        var generation = new Generation(new AssistantMessage(text));
+        var response = new ChatResponse(java.util.List.of(generation), responseMetadata);
+        when(responseMetadata.getUsage()).thenReturn(usage);
+        when(usage.getPromptTokens()).thenReturn(10L);
+        when(usage.getGenerationTokens()).thenReturn(20L);
+        when(callSpec.chatResponse()).thenReturn(response);
+        return response;
     }
 
     @Test
@@ -58,7 +77,7 @@ class ConversationServiceTest {
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
         when(requestSpec.advisors(any())).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callSpec);
-        when(callSpec.content()).thenReturn("Nice to meet you, Alice!");
+        stubChatResponse("Nice to meet you, Alice!");
 
         var turn = service.chat("conv-1", "alice", "Hi there!");
 
@@ -103,18 +122,15 @@ class ConversationServiceTest {
         when(chatClient.prompt()).thenReturn(requestSpec);
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callSpec);
-        when(callSpec.content()).thenReturn("Reply");
+        stubChatResponse("Reply");
 
-        // Capture the advisor param to verify scoping
-        // (full param capture requires deeper mocking; here we verify different users get different scoping)
         var advisorsCaptor = org.mockito.ArgumentCaptor.forClass(java.util.function.Consumer.class);
         when(requestSpec.advisors(advisorsCaptor.capture())).thenReturn(requestSpec);
 
         service.chat("conv-1", "alice", "Hello");
         service.chat("conv-1", "bob", "Hello");
 
-        // Both calls go through, but the scoped IDs passed to the advisor differ
-        // (alice:conv-1 vs bob:conv-1) — verified by checking advisors was called twice
+        // Both calls go through; scoped IDs (alice:conv-1, bob:conv-1) differ — advisors called twice
         verify(requestSpec, times(2)).advisors(any());
     }
 
@@ -125,16 +141,25 @@ class ConversationServiceTest {
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
         when(requestSpec.advisors(any())).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callSpec);
-        when(callSpec.content())
-                .thenReturn("Hi Alice!")        // turn 1
-                .thenReturn("I'm doing well!"); // turn 2
+        stubChatResponse("Hi Alice!");
 
         var turn1 = service.chat("conv-1", "alice", "Hello");
+
+        // Stub second response
+        var gen2 = new Generation(new AssistantMessage("I'm doing well!"));
+        var resp2 = new ChatResponse(java.util.List.of(gen2), responseMetadata);
+        when(callSpec.chatResponse()).thenReturn(resp2);
+
         var turn2 = service.chat("conv-1", "alice", "How are you?");
 
         assertThat(turn1.assistantReply()).isEqualTo("Hi Alice!");
         assertThat(turn2.assistantReply()).isEqualTo("I'm doing well!");
-        // Verify the LLM was called twice (once per turn)
         verify(chatClient, times(2)).prompt();
+    }
+
+    @Test
+    void clearConversationDelegatesToMemoryStore() {
+        service.clearConversation("conv-1", "alice");
+        verify(messageStore).clear("alice:conv-1");
     }
 }

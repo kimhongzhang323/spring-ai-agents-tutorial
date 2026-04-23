@@ -5,8 +5,10 @@ import com.masterclass.structured.domain.ProductReview;
 import com.masterclass.structured.domain.ResumeData;
 import com.masterclass.structured.exception.ParseRetryException;
 import com.masterclass.shared.guardrails.InputValidator;
+import com.masterclass.shared.observability.TokenUsageMetrics;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.stereotype.Service;
 
@@ -33,12 +35,15 @@ public class ExtractionService {
 
     private final ChatClient chatClient;
     private final InputValidator inputValidator;
+    private final TokenUsageMetrics tokenUsageMetrics;
 
-    public ExtractionService(ChatClient.Builder chatClientBuilder, InputValidator inputValidator) {
+    public ExtractionService(ChatClient.Builder chatClientBuilder, InputValidator inputValidator,
+                             TokenUsageMetrics tokenUsageMetrics) {
         this.chatClient = chatClientBuilder
                 .defaultSystem(EXTRACTION_SYSTEM)
                 .build();
         this.inputValidator = inputValidator;
+        this.tokenUsageMetrics = tokenUsageMetrics;
     }
 
     @Retry(name = "parseRetry", fallbackMethod = "invoiceFallback")
@@ -46,7 +51,7 @@ public class ExtractionService {
         validate(rawText);
         var converter = new BeanOutputConverter<>(InvoiceData.class);
 
-        String response = chatClient.prompt()
+        ChatResponse chatResponse = chatClient.prompt()
                 .user(u -> u.text("""
                         Extract all invoice data from the following text.
                         {format}
@@ -57,9 +62,10 @@ public class ExtractionService {
                         .param("format", converter.getFormat())
                         .param("text", rawText))
                 .call()
-                .content();
+                .chatResponse();
 
-        return parseOrThrow(response, converter, "invoice");
+        recordUsage(chatResponse);
+        return parseOrThrow(chatResponse.getResult().getOutput().getText(), converter, "invoice");
     }
 
     @Retry(name = "parseRetry", fallbackMethod = "reviewFallback")
@@ -67,7 +73,7 @@ public class ExtractionService {
         validate(reviewText);
         var converter = new BeanOutputConverter<>(ProductReview.class);
 
-        String response = chatClient.prompt()
+        ChatResponse chatResponse = chatClient.prompt()
                 .user(u -> u.text("""
                         Analyze the sentiment and extract structured data from this product review.
                         {format}
@@ -78,9 +84,10 @@ public class ExtractionService {
                         .param("format", converter.getFormat())
                         .param("text", reviewText))
                 .call()
-                .content();
+                .chatResponse();
 
-        return parseOrThrow(response, converter, "review");
+        recordUsage(chatResponse);
+        return parseOrThrow(chatResponse.getResult().getOutput().getText(), converter, "review");
     }
 
     @Retry(name = "parseRetry", fallbackMethod = "resumeFallback")
@@ -88,7 +95,7 @@ public class ExtractionService {
         validate(resumeText);
         var converter = new BeanOutputConverter<>(ResumeData.class);
 
-        String response = chatClient.prompt()
+        ChatResponse chatResponse = chatClient.prompt()
                 .user(u -> u.text("""
                         Extract structured data from this resume or CV.
                         {format}
@@ -99,9 +106,10 @@ public class ExtractionService {
                         .param("format", converter.getFormat())
                         .param("text", resumeText))
                 .call()
-                .content();
+                .chatResponse();
 
-        return parseOrThrow(response, converter, "resume");
+        recordUsage(chatResponse);
+        return parseOrThrow(chatResponse.getResult().getOutput().getText(), converter, "resume");
     }
 
     // ── Resilience4j fallback methods ─────────────────────────────────────────
@@ -119,6 +127,16 @@ public class ExtractionService {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private void recordUsage(ChatResponse response) {
+        var usage = response.getMetadata().getUsage();
+        if (usage != null) {
+            tokenUsageMetrics.record(
+                usage.getPromptTokens() != null ? usage.getPromptTokens().intValue() : 0,
+                usage.getGenerationTokens() != null ? usage.getGenerationTokens().intValue() : 0
+            );
+        }
+    }
 
     private <T> T parseOrThrow(String response, BeanOutputConverter<T> converter, String context) {
         try {
