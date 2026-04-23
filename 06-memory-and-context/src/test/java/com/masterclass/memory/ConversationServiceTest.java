@@ -13,10 +13,11 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
-import org.springframework.ai.chat.metadata.Usage;
+import org.springframework.ai.chat.metadata.DefaultUsage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.util.function.Consumer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -48,7 +49,6 @@ class ConversationServiceTest {
     @Mock InputValidator inputValidator;
     @Mock TokenUsageMetrics tokenUsageMetrics;
     @Mock ChatResponseMetadata responseMetadata;
-    @Mock Usage usage;
 
     ConversationService service;
 
@@ -63,9 +63,7 @@ class ConversationServiceTest {
     private ChatResponse stubChatResponse(String text) {
         var generation = new Generation(new AssistantMessage(text));
         var response = new ChatResponse(java.util.List.of(generation), responseMetadata);
-        when(responseMetadata.getUsage()).thenReturn(usage);
-        when(usage.getPromptTokens()).thenReturn(10L);
-        when(usage.getGenerationTokens()).thenReturn(20L);
+        when(responseMetadata.getUsage()).thenReturn(new DefaultUsage(10, 20));
         when(callSpec.chatResponse()).thenReturn(response);
         return response;
     }
@@ -75,7 +73,7 @@ class ConversationServiceTest {
         when(inputValidator.validate(anyString())).thenReturn(new InputValidator.ValidationResult(true, null));
         when(chatClient.prompt()).thenReturn(requestSpec);
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
-        when(requestSpec.advisors(any())).thenReturn(requestSpec);
+        when(requestSpec.advisors(any(Consumer.class))).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callSpec);
         stubChatResponse("Nice to meet you, Alice!");
 
@@ -124,14 +122,14 @@ class ConversationServiceTest {
         when(requestSpec.call()).thenReturn(callSpec);
         stubChatResponse("Reply");
 
-        var advisorsCaptor = org.mockito.ArgumentCaptor.forClass(java.util.function.Consumer.class);
+        var advisorsCaptor = org.mockito.ArgumentCaptor.forClass(Consumer.class);
         when(requestSpec.advisors(advisorsCaptor.capture())).thenReturn(requestSpec);
 
         service.chat("conv-1", "alice", "Hello");
         service.chat("conv-1", "bob", "Hello");
 
         // Both calls go through; scoped IDs (alice:conv-1, bob:conv-1) differ — advisors called twice
-        verify(requestSpec, times(2)).advisors(any());
+        verify(requestSpec, times(2)).advisors(any(Consumer.class));
     }
 
     @Test
@@ -139,7 +137,7 @@ class ConversationServiceTest {
         when(inputValidator.validate(anyString())).thenReturn(new InputValidator.ValidationResult(true, null));
         when(chatClient.prompt()).thenReturn(requestSpec);
         when(requestSpec.user(anyString())).thenReturn(requestSpec);
-        when(requestSpec.advisors(any())).thenReturn(requestSpec);
+        when(requestSpec.advisors(any(Consumer.class))).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(callSpec);
         stubChatResponse("Hi Alice!");
 

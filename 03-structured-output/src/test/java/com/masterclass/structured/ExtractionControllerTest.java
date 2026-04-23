@@ -2,6 +2,8 @@ package com.masterclass.structured;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.masterclass.shared.dto.AgentRequest;
+import com.masterclass.shared.observability.TokenUsageMetrics;
+import io.micrometer.core.instrument.MeterRegistry;
 import com.masterclass.structured.domain.InvoiceData;
 import com.masterclass.structured.domain.ProductReview;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,12 @@ class ExtractionControllerTest {
 
     @MockBean
     ExtractionService extractionService;
+
+    @MockBean
+    TokenUsageMetrics tokenUsageMetrics;
+
+    @MockBean
+    MeterRegistry meterRegistry;
 
     @Test
     @WithMockUser

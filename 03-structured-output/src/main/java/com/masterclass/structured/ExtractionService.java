@@ -132,8 +132,8 @@ public class ExtractionService {
         var usage = response.getMetadata().getUsage();
         if (usage != null) {
             tokenUsageMetrics.record(
-                usage.getPromptTokens() != null ? usage.getPromptTokens().intValue() : 0,
-                usage.getGenerationTokens() != null ? usage.getGenerationTokens().intValue() : 0
+                usage.getPromptTokens() != null ? usage.getPromptTokens() : 0,
+                usage.getCompletionTokens() != null ? usage.getCompletionTokens() : 0
             );
         }
     }

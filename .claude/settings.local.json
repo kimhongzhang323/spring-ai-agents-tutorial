@@ -58,7 +58,20 @@
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn test -pl 17-microservices-integration -Dtest=SemanticResponseCacheTest,LlmBatchAccumulatorTest -q)",
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn dependency:tree -pl 17-microservices-integration -q)",
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn test -pl 17-microservices-integration -Dtest=SemanticResponseCacheTest,LlmBatchAccumulatorTest)",
-      "PowerShell(mvn test *)"
+      "PowerShell(mvn test *)",
+      "Bash(where java *)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 03-structured-output test)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 06-memory-and-context test)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl shared dependency:build-classpath -q -DincludeArtifactIds=spring-ai-core)",
+      "Read(//c/Users/kimho/.m2/repository/org/springframework/ai/spring-ai-core/**)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 03-structured-output help:effective-pom -q)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" javap *)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 03-structured-output dependency:resolve)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 03-structured-output dependency:tree)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 03-structured-output test -Dtest=ExtractionControllerTest -e)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 06-memory-and-context test -Dtest=ConversationControllerTest -e)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 06-memory-and-context test -Dtest=RedisMessageStoreTest)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl shared install -q)"
     ]
   }
 }

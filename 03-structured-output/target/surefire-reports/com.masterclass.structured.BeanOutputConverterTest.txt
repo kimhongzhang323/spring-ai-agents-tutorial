@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.masterclass.structured.BeanOutputConverterTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.180 s -- in com.masterclass.structured.BeanOutputConverterTest
