@@ -8,6 +8,7 @@ import com.masterclass.parallelteam.model.TeamResponse;
 import com.masterclass.parallelteam.service.JobStore;
 import com.masterclass.parallelteam.service.TeamCoordinator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -18,12 +19,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping("/api/v1/parallel-team")
 @Tag(name = "Parallel Agent Team", description = "Run a team of specialized agents concurrently")
+@SecurityRequirement(name = "bearerAuth")
 public class ParallelTeamController {
 
     private final TeamCoordinator coordinator;
@@ -67,6 +69,22 @@ public class ParallelTeamController {
 
         Executors.newVirtualThreadPerTaskExecutor().submit(() -> {
             try {
+                // Replay any events that arrived before the SSE connection was established.
+                // This handles the race condition where the job completes before the client connects.
+                List<AgentEvent> history = eventBus.getHistory(jobId);
+                for (AgentEvent event : history) {
+                    emitter.send(SseEmitter.event()
+                            .name(event.getClass().getSimpleName())
+                            .data(event.toString()));
+                }
+
+                // If the publisher is already closed (job done), we're finished after replay.
+                if (!eventBus.isPublisherOpen(jobId)) {
+                    emitter.complete();
+                    return;
+                }
+
+                // Live subscription for jobs still in progress.
                 eventBus.subscribe(jobId, event -> {
                     try {
                         emitter.send(SseEmitter.event()
@@ -95,7 +113,7 @@ public class ParallelTeamController {
                 job.topic(),
                 job.status(),
                 job.finalReport(),
-                job.status() == TeamJob.JobStatus.RUNNING ? null : Instant.now(),
+                job.completedAt(),
                 "/api/v1/parallel-team/" + job.jobId() + "/stream"
         );
     }

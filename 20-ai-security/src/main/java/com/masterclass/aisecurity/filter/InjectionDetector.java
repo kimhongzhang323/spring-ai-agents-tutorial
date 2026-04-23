@@ -41,13 +41,13 @@ public class InjectionDetector implements SecurityFilter {
 
     private final ChatClient classifierClient;
     private final Counter injectionBlockedCounter;
+    private final boolean classifierEnabled;
 
-    @Value("${ai-security.injection-classifier-enabled:true}")
-    private boolean classifierEnabled;
-
-    public InjectionDetector(ChatClient.Builder builder, MeterRegistry meterRegistry) {
+    public InjectionDetector(ChatClient.Builder builder, MeterRegistry meterRegistry,
+                             @Value("${ai-security.injection-classifier-enabled:true}") boolean classifierEnabled) {
         this.classifierClient = builder.build();
         this.injectionBlockedCounter = meterRegistry.counter("security.injection.blocked");
+        this.classifierEnabled = classifierEnabled;
     }
 
     @Override

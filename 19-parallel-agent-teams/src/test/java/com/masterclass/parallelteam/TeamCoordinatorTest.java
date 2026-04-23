@@ -14,9 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -42,7 +39,6 @@ class TeamCoordinatorTest {
         var coordinator = new TeamCoordinator(researchAgent, analysisAgent, citationAgent,
                 synthesisAgent, eventBus, jobStore, new SimpleMeterRegistry());
 
-        CountDownLatch latch = new CountDownLatch(1);
         TeamJob job = coordinator.startJob("AI in healthcare", "user1");
 
         // Poll until job completes (max 5 s)
@@ -56,6 +52,7 @@ class TeamCoordinatorTest {
 
         assertThat(completed.status()).isEqualTo(TeamJob.JobStatus.COMPLETED);
         assertThat(completed.finalReport()).isEqualTo("final-report");
+        assertThat(completed.completedAt()).isNotNull();
 
         verify(researchAgent).research(anyString(), eq("AI in healthcare"));
         verify(analysisAgent).analyze(anyString(), eq("AI in healthcare"));

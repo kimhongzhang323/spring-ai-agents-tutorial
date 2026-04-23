@@ -9,6 +9,7 @@ public record TeamJob(
         String topic,
         String userId,
         Instant createdAt,
+        Instant completedAt,
         JobStatus status,
         List<String> progressLog,
         String finalReport
@@ -16,15 +17,17 @@ public record TeamJob(
     public enum JobStatus { RUNNING, COMPLETED, FAILED }
 
     public static TeamJob create(String jobId, String topic, String userId) {
-        return new TeamJob(jobId, topic, userId, Instant.now(),
+        return new TeamJob(jobId, topic, userId, Instant.now(), null,
                 JobStatus.RUNNING, new CopyOnWriteArrayList<>(), null);
     }
 
     public TeamJob withCompleted(String report) {
-        return new TeamJob(jobId, topic, userId, createdAt, JobStatus.COMPLETED, progressLog, report);
+        return new TeamJob(jobId, topic, userId, createdAt, Instant.now(),
+                JobStatus.COMPLETED, progressLog, report);
     }
 
     public TeamJob withFailed() {
-        return new TeamJob(jobId, topic, userId, createdAt, JobStatus.FAILED, progressLog, null);
+        return new TeamJob(jobId, topic, userId, createdAt, Instant.now(),
+                JobStatus.FAILED, progressLog, null);
     }
 }

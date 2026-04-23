@@ -108,6 +108,8 @@ public class TeamCoordinator {
                             .map(j -> j.withCompleted(report))
                             .orElseThrow();
                     jobStore.update(completed);
+                    // Close publisher so SSE subscribers receive onComplete; history kept for replay
+                    eventBus.closeJob(jobId);
 
                     timerSample.stop(meterRegistry.timer("parallel.team.duration", "status", "success"));
                     log.info("[job={}] Team completed successfully", jobId);
@@ -116,6 +118,7 @@ public class TeamCoordinator {
                     log.error("[job={}] Team failed during synthesis: {}", jobId, ex.getMessage());
                     jobStore.find(jobId).map(TeamJob::withFailed).ifPresent(jobStore::update);
                     eventBus.publish(new AgentEvent.AgentFailed(jobId, "TeamCoordinator", ex.getMessage(), Instant.now()));
+                    eventBus.closeJob(jobId);
                     timerSample.stop(meterRegistry.timer("parallel.team.duration", "status", "failed"));
                     return null;
                 });

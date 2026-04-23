@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mutable context passed through the SecurityGateway filter chain.
- * Each filter may sanitize the input or append warnings.
+ * Immutable context passed through the SecurityGateway filter chain.
+ * Every mutation returns a new instance — the warnings list is never shared.
  */
 public record SecurityContext(
         String userId,
@@ -15,8 +15,13 @@ public record SecurityContext(
         List<String> warnings,
         boolean blocked
 ) {
+    /** Canonical constructor: defensive copy so callers cannot mutate our list. */
+    public SecurityContext {
+        warnings = List.copyOf(warnings);
+    }
+
     public static SecurityContext of(String userId, String input) {
-        return new SecurityContext(userId, input, input, 0.0, new ArrayList<>(), false);
+        return new SecurityContext(userId, input, input, 0.0, List.of(), false);
     }
 
     public SecurityContext withSanitized(String sanitized) {
@@ -27,9 +32,11 @@ public record SecurityContext(
         return new SecurityContext(userId, originalInput, sanitizedInput, score, warnings, blocked);
     }
 
+    /** Returns a new context with the warning appended — does NOT mutate this instance. */
     public SecurityContext withWarning(String warning) {
-        warnings.add(warning);
-        return this;
+        List<String> updated = new ArrayList<>(warnings);
+        updated.add(warning);
+        return new SecurityContext(userId, originalInput, sanitizedInput, riskScore, updated, blocked);
     }
 
     public SecurityContext blocked() {

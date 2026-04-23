@@ -41,9 +41,17 @@ public class AgentEventBus {
         publisher.subscribe(new FlowSubscriberAdapter(listener));
     }
 
+    /**
+     * Closes the publisher for a job (signals onComplete to all live subscribers) but
+     * retains event history for late-joining SSE clients to replay.
+     */
     public void closeJob(String jobId) {
         var publisher = publishers.remove(jobId);
         if (publisher != null) publisher.close();
+        // History is kept intentionally for replay — call purgeHistory() for full cleanup
+    }
+
+    public void purgeHistory(String jobId) {
         eventHistory.remove(jobId);
     }
 
@@ -52,23 +60,35 @@ public class AgentEventBus {
         return history == null ? java.util.List.of() : java.util.List.copyOf(history);
     }
 
-    // Simple Flow.Subscriber adapter
-    private record FlowSubscriberAdapter(Consumer<AgentEvent> listener)
+    public boolean isPublisherOpen(String jobId) {
+        return publishers.containsKey(jobId);
+    }
+
+    // Flow.Subscriber adapter — must be a class (not a record) because subscription is mutable
+    private static final class FlowSubscriberAdapter
             implements java.util.concurrent.Flow.Subscriber<AgentEvent> {
 
+        private static final Logger log = LoggerFactory.getLogger(FlowSubscriberAdapter.class);
+
+        private final Consumer<AgentEvent> listener;
         private java.util.concurrent.Flow.Subscription subscription;
+
+        FlowSubscriberAdapter(Consumer<AgentEvent> listener) {
+            this.listener = listener;
+        }
 
         @Override
         public void onSubscribe(java.util.concurrent.Flow.Subscription s) {
-            this.subscription.request(Long.MAX_VALUE);
+            this.subscription = s;
+            s.request(Long.MAX_VALUE);
         }
 
-        // Workaround: store subscription in a mutable holder since record fields are final
-        // FlowSubscriberAdapter is package-private; replace with a class if further mutation needed
         @Override
         public void onNext(AgentEvent event) { listener.accept(event); }
+
         @Override
-        public void onError(Throwable t) { LoggerFactory.getLogger(FlowSubscriberAdapter.class).error("Event bus error", t); }
+        public void onError(Throwable t) { log.error("Event bus subscriber error", t); }
+
         @Override
         public void onComplete() {}
     }

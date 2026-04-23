@@ -6,8 +6,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class InputLengthFilter implements SecurityFilter {
 
-    @Value("${ai-security.max-input-length:2000}")
-    private int maxLength;
+    private final int maxLength;
+
+    public InputLengthFilter(@Value("${ai-security.max-input-length:2000}") int maxLength) {
+        this.maxLength = maxLength;
+    }
 
     @Override
     public SecurityContext apply(SecurityContext ctx) {

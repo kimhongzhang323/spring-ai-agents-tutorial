@@ -11,17 +11,14 @@ import org.springframework.ai.chat.client.ChatClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class InjectionDetectorTest {
 
     private InjectionDetector detectorWithDisabledClassifier() {
         var builder = mock(ChatClient.Builder.class, RETURNS_DEEP_STUBS);
-        var detector = new InjectionDetector(builder, new SimpleMeterRegistry());
-        // Disable LLM classifier so tests are deterministic
-        setField(detector, "classifierEnabled", false);
-        return detector;
+        // Use the constructor that accepts classifierEnabled directly — no reflection needed
+        return new InjectionDetector(builder, new SimpleMeterRegistry(), false);
     }
 
     @Test
@@ -50,13 +47,4 @@ class InjectionDetectorTest {
                         .isEqualTo(SecurityViolationException.ViolationType.PROMPT_INJECTION));
     }
 
-    private static void setField(Object target, String fieldName, Object value) {
-        try {
-            var field = target.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(target, value);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
