@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.*;
  * 5. lastN param returns only the tail of the message list
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class RedisMessageStoreTest {
 
     @Mock StringRedisTemplate redis;
@@ -76,12 +79,10 @@ class RedisMessageStoreTest {
 
     @Test
     void slidingWindowEvictsOldestMessages() throws Exception {
-        // Pre-populate with 4 existing messages (maxMessages=5)
-        List<Message> existing = new ArrayList<>();
-        for (int i = 1; i <= 4; i++) {
-            existing.add(new UserMessage("msg-" + i));
-        }
-        when(valueOps.get(any())).thenReturn(objectMapper.writeValueAsString(existing));
+        // Pre-populate with 4 existing messages in StoredMessage format (maxMessages=5)
+        String existingJson = "[{\"type\":\"USER\",\"text\":\"msg-1\"},{\"type\":\"USER\",\"text\":\"msg-2\"}" +
+                ",{\"type\":\"USER\",\"text\":\"msg-3\"},{\"type\":\"USER\",\"text\":\"msg-4\"}]";
+        when(valueOps.get(any())).thenReturn(existingJson);
 
         // Add 2 more messages — total would be 6, should be capped to 5
         store.add("conv-1", List.of(new UserMessage("msg-5"), new UserMessage("msg-6")));
@@ -89,20 +90,19 @@ class RedisMessageStoreTest {
         var jsonCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
         verify(valueOps).set(any(), jsonCaptor.capture(), any());
 
-        // Deserialize what was actually stored
-        var storedType = objectMapper.getTypeFactory()
-                .constructCollectionType(List.class, Message.class);
-        // Verify the stored JSON has 5 items (not 6)
+        // Verify the stored JSON has 5 items (not 6) — oldest msg-1 was evicted
         var stored = objectMapper.readValue(jsonCaptor.getValue(),
                 new com.fasterxml.jackson.core.type.TypeReference<List<java.util.LinkedHashMap<String, Object>>>() {});
         assertThat(stored).hasSize(5);
+        assertThat(stored.get(0).get("text")).isEqualTo("msg-2");
+        assertThat(stored.get(4).get("text")).isEqualTo("msg-6");
     }
 
     @Test
     void getReturnsEmptyListWhenRedisReturnsNull() {
         when(valueOps.get(any())).thenReturn(null);
 
-        List<Message> result = store.get("non-existent", Integer.MAX_VALUE);
+        List<Message> result = store.get("non-existent");
 
         assertThat(result).isEmpty();
     }
@@ -116,13 +116,9 @@ class RedisMessageStoreTest {
 
     @Test
     void getLastNReturnsOnlyTailMessages() throws Exception {
-        List<Message> messages = List.of(
-                new UserMessage("old-1"),
-                new UserMessage("old-2"),
-                new UserMessage("recent-1"),
-                new UserMessage("recent-2")
-        );
-        when(valueOps.get(any())).thenReturn(objectMapper.writeValueAsString(messages));
+        String json = "[{\"type\":\"USER\",\"text\":\"old-1\"},{\"type\":\"USER\",\"text\":\"old-2\"}" +
+                ",{\"type\":\"USER\",\"text\":\"recent-1\"},{\"type\":\"USER\",\"text\":\"recent-2\"}]";
+        when(valueOps.get(any())).thenReturn(json);
 
         List<Message> lastTwo = store.get("conv-1", 2);
 
@@ -143,7 +139,7 @@ class RedisMessageStoreTest {
     void conversationScopingUsesCorrectRedisKey() {
         when(valueOps.get("chat:memory:alice:conv-1")).thenReturn(null);
 
-        store.get("alice:conv-1", Integer.MAX_VALUE);
+        store.get("alice:conv-1");
 
         verify(valueOps).get("chat:memory:alice:conv-1");
     }

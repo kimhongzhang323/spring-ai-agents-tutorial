@@ -2,6 +2,8 @@ package com.masterclass.memory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.masterclass.shared.dto.AgentRequest;
+import com.masterclass.shared.observability.TokenUsageMetrics;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,6 +25,10 @@ class ConversationControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @MockBean ConversationService conversationService;
+    @MockBean SummarizingMemoryService summarizingMemoryService;
+    @MockBean RedisMessageStore redisMessageStore;
+    @MockBean TokenUsageMetrics tokenUsageMetrics;
+    @MockBean MeterRegistry meterRegistry;
 
     @Test
     @WithMockUser(username = "alice")
