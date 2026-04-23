@@ -57,7 +57,8 @@
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn test -pl 17-microservices-integration -Dtest=SemanticResponseCacheTest -q)",
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn test -pl 17-microservices-integration -Dtest=SemanticResponseCacheTest,LlmBatchAccumulatorTest -q)",
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn dependency:tree -pl 17-microservices-integration -q)",
-      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn test -pl 17-microservices-integration -Dtest=SemanticResponseCacheTest,LlmBatchAccumulatorTest)"
+      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-21\" mvn test -pl 17-microservices-integration -Dtest=SemanticResponseCacheTest,LlmBatchAccumulatorTest)",
+      "PowerShell(mvn test *)"
     ]
   }
 }

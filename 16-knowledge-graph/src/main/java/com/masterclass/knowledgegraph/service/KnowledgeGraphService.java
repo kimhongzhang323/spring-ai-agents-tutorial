@@ -110,10 +110,6 @@ public class KnowledgeGraphService {
      */
     public RunResult resumeBuild(String threadId, String humanResponse) {
         log.info("Resuming graph BUILD pipeline threadId={} humanResponse={}", threadId, humanResponse);
-        GraphState resumeState = GraphState.of(Map.of(
-                "human_response", humanResponse,
-                "human_approved", humanResponse.equalsIgnoreCase("approve")
-        ));
         return buildPipeline.resume(threadId, humanResponse);
     }
 

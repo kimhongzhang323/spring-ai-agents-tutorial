@@ -4,6 +4,7 @@ import com.masterclass.knowledgegraph.graph.RunResult;
 import com.masterclass.knowledgegraph.model.KnowledgeGraph;
 import com.masterclass.knowledgegraph.service.KnowledgeGraphService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/knowledge-graph")
 @Tag(name = "Knowledge Graph", description = "LangGraph-style stateful agent pipeline for building and querying knowledge graphs")
+@SecurityRequirement(name = "bearerAuth")
 public class KnowledgeGraphController {
 
     private final KnowledgeGraphService kgService;
