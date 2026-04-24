@@ -9,6 +9,7 @@
         <module name="17-microservices-integration" />
         <module name="shared" />
         <module name="16-knowledge-graph" />
+        <module name="21-capstone-loan-underwriting" />
         <module name="banking-assistant" />
         <module name="20-ai-security" />
         <module name="15-multi-llm-providers" />

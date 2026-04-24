@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: loan-underwriting-capstone
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:capstone-local-dev-secret-min-256-bits-long!}
+      expiration-ms: 3600000
+
+  rate-limit:
+    capacity-per-user: 20
+    refill-tokens-per-minute: 10
+
+resilience4j:
+  retry:
+    instances:
+      llm-call:
+        max-attempts: 3
+        wait-duration: 2s
+        exponential-backoff-multiplier: 2
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: llama3.2
+          temperature: 0.2
+    # Disable OpenAI auto-config when running locally
+    openai:
+      api-key: "not-used-in-local-profile"
+      chat:
+        enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: cloud
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini   # triage agents use this
+          temperature: 0.2
+    ollama:
+      base-url: "not-used-in-cloud-profile"

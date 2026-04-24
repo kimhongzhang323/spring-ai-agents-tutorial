@@ -1,0 +1,7 @@
+com\masterclass\capstone\CreditBureauToolTest.class
+com\masterclass\capstone\PolicyRetrieverTest.class
+com\masterclass\capstone\FindingParserTest.class
+com\masterclass\capstone\UnderwritingOrchestratorTest.class
+com\masterclass\capstone\evaluation\GoldenDatasetIT$Case.class
+com\masterclass\capstone\evaluation\GoldenDatasetIT.class
+com\masterclass\capstone\CitationValidatorTest.class

@@ -71,7 +71,10 @@
       "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 03-structured-output test -Dtest=ExtractionControllerTest -e)",
       "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 06-memory-and-context test -Dtest=ConversationControllerTest -e)",
       "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl 06-memory-and-context test -Dtest=RedisMessageStoreTest)",
-      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl shared install -q)"
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn -pl shared install -q)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn compile -pl 21-capstone-loan-underwriting -am -q)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn test -pl 21-capstone-loan-underwriting -q)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-21.0.4.7-hotspot\" mvn test -pl 21-capstone-loan-underwriting)"
     ]
   }
 }

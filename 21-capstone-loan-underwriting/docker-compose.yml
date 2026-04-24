@@ -1,0 +1,85 @@
+name: capstone-loan-underwriting
+
+# Extends the root compose file's shared services (Ollama, Redis, Prometheus, Grafana, Jaeger).
+# Run from the repo root: docker compose -f docker-compose.yml -f 21-capstone-loan-underwriting/docker-compose.yml up -d
+# Or standalone (includes all required services):
+
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: capstone-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-capstone:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: capstone-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: capstone-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: capstone-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: capstone
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: capstone-jaeger
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    restart: unless-stopped
+
+  # The underwriting app itself — optional if you prefer to run it from IDE
+  underwriting-app:
+    build:
+      context: ..
+      dockerfile: 21-capstone-loan-underwriting/Dockerfile
+    container_name: capstone-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      OLLAMA_BASE_URL: http://ollama:11434
+      JWT_SECRET: capstone-docker-compose-secret-min-256-bits!
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: on-failure
+    profiles:
+      - full   # Only starts with: docker compose --profile full up
+
+volumes:
+  ollama-capstone:

@@ -1,0 +1,11 @@
+{
+  "groups": [
+    {
+      "name": "app.rate-limit",
+      "type": "com.masterclass.shared.ratelimit.RateLimitProperties",
+      "sourceType": "com.masterclass.shared.ratelimit.RateLimitProperties"
+    }
+  ],
+  "properties": [],
+  "hints": []
+}

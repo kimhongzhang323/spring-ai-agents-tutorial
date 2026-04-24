@@ -1,0 +1,62 @@
+[
+  {
+    "applicantId": "APP-001",
+    "fullName": "Maria Chen",
+    "age": 34,
+    "employmentStatus": "FULL_TIME",
+    "employer": "Orion Systems",
+    "yearsAtEmployer": 6,
+    "statedAnnualIncome": 128000,
+    "creditScore": 782,
+    "existingMonthlyDebt": 850,
+    "addressState": "WA"
+  },
+  {
+    "applicantId": "APP-002",
+    "fullName": "Jordan Reyes",
+    "age": 29,
+    "employmentStatus": "CONTRACT",
+    "employer": "Freelance",
+    "yearsAtEmployer": 2,
+    "statedAnnualIncome": 210000,
+    "creditScore": 648,
+    "existingMonthlyDebt": 2400,
+    "addressState": "CA"
+  },
+  {
+    "applicantId": "APP-003",
+    "fullName": "Priya Natarajan",
+    "age": 41,
+    "employmentStatus": "FULL_TIME",
+    "employer": "BlueStone Health",
+    "yearsAtEmployer": 12,
+    "statedAnnualIncome": 94000,
+    "creditScore": 721,
+    "existingMonthlyDebt": 1100,
+    "addressState": "NY"
+  },
+  {
+    "applicantId": "APP-004",
+    "fullName": "Samuel Okafor",
+    "age": 52,
+    "employmentStatus": "SELF_EMPLOYED",
+    "employer": "Okafor Consulting LLC",
+    "yearsAtEmployer": 8,
+    "statedAnnualIncome": 175000,
+    "creditScore": 580,
+    "existingMonthlyDebt": 3200,
+    "addressState": "TX"
+  },
+  {
+    "applicantId": "APP-005",
+    "fullName": "Lin Zhao",
+    "age": 24,
+    "employmentStatus": "FULL_TIME",
+    "employer": "NovaPay",
+    "yearsAtEmployer": 1,
+    "statedAnnualIncome": 62000,
+    "creditScore": 701,
+    "existingMonthlyDebt": 450,
+    "addressState": "MA"
+  }
+]
